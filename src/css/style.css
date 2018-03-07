@@ -1,0 +1,70 @@
+html, body, div, span, h1, h2, p, a, img, strong, ul, li, button, footer, header {margin: 0; padding: 0; border: 0; vertical-align: baseline;}
+*, :after, :before {-webkit-box-sizing: border-box; box-sizing: border-box;}
+a, button, div {outline: none;}
+ul {list-style: none; display: block;}
+img {border: none;}
+
+/* grid */
+html, body, .wrap {height: 100%;}
+.ship, .icon-field {background: url('../images/sprite.png') no-repeat;}
+
+body {font-size: 18px; line-height: 24px; color: #4530af;}
+p {margin-bottom: 10px;}
+
+.btn-play {
+    width: 150px;
+    height: 45px;
+    display: block;
+    font-size: 24px;
+    line-height: 40px;
+    text-align: center;
+    margin: 10px auto;
+    cursor: pointer;
+    border: 2px solid;
+}
+
+.text-center {text-align: center;}
+.clearfix:before, .clearfix:after {display:table; content:'';}
+.clearfix:after {clear:both;}
+
+[data-hidden="true"] {display:none;}
+[data-hidden="false"], .block {display:block;}
+
+.wrapper {width: 860px; height: 530px; position: relative; margin: 0 auto;}
+.text-top {font-size: 30px; line-height: 70px; text-align: center; margin-bottom: 10px;}
+.text-btm {color: #4530af; text-align: center; padding-top: 10px;}
+
+.outer {margin-bottom: 20px;}
+.field {width: 366px; height: 363px; position: relative;}
+.field-user {float: left; margin-left: 38px;}
+.field-comp{float: right; margin-right: 26px;}
+
+.ships {width: 330px; height: 330px; position: relative; left: 29px; top: 27px;}
+.ship {height: 35px; position: absolute; border: 2px;}
+.ship.success{border-color: green;}
+.ship.unsuccess{border-color: red;}
+.vertical {transform: rotate(90deg); transform-origin: 17.5px 17.5px;}
+
+.fourdeck {width: 134px;}
+.tripledeck {width: 101px;}
+.doubledeck {width: 68px; background-position: -270px 0;}
+.singledeck {width: 35px; background-position: -360px 0;}
+
+.instruction {margin-left: 430px; -webkit-user-select: none; user-select: none;}
+.type-placement-box {line-height: 34px; padding-bottom: 18px;}
+.type-placement-box .link {font-size: 20px; border-bottom: dashed 2px #4530af; cursor: pointer;}
+
+.initial-ships li {height: 35px; position: relative; overflow: hidden; margin-top: 31px;}
+.initial-ships .ship {left: 0; top: 0; float: left; cursor: move;}
+.initial-ships .tripledeck1 {left: 164px;}
+.initial-ships .tripledeck2 {left: 297px;}
+.initial-ships .doubledeck2 {left: 99px;}
+.initial-ships .doubledeck3 {left: 197px;}
+.initial-ships .singledeck2 {left: 65px;}
+.initial-ships .singledeck3 {left: 131px;}
+.initial-ships .singledeck4 {left: 197px;}
+
+.icon-field {width: 33px; height: 33px; position: absolute; z-index: 5;}
+.dot {background-position: -410px 0;}
+.red-cross {background-position: -410px -50px;}
+.shaded-cell {background-position: -410px -100px;}
