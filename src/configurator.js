@@ -52,6 +52,7 @@ export default class Configurator {
     startConfigure() {
         var fieldElement = document.getElementById('field_user');
         this.field = new Field(fieldElement);
+        console.log(this.field);
         var typePlacement = document.getElementById('type_placement');
         typePlacement.addEventListener('click', this.onTypePlacementClick.bind(this));
     }
@@ -65,6 +66,7 @@ export default class Configurator {
         // очищаем матрицу
         me.field.cleanField();
         me.field.resetMatrix();
+        me.setObserver();
 
         var type = el.getAttribute('data-target'),
             typeGeneration = {
@@ -74,26 +76,24 @@ export default class Configurator {
                 },
                 'manually': function() {
                     me.generateShipCollection();
-                    if (shipsCollection.getAttribute('data-hidden') === 'true') {
-                        shipsCollection.setAttribute('data-hidden', false);
-                        me.setObserver();
-                    } else {
-                        shipsCollection.setAttribute('data-hidden', true);
-                    }
+                    shipsCollection.setAttribute('data-hidden', false);
                 }
             };
         typeGeneration[type]();
     }
 
     setObserver () {
-        var fieldUser = document.getElementById('field_user'),
-            initialShips = document.getElementById('ships_collection');
+        if (!this.hasObservers) {
+            this.hasObservers = true;
+            var userField = this.field.element;
+            var initialShips = document.getElementById('ships_collection');
 
-        fieldUser.addEventListener('mousedown', this.onMouseDown.bind(this));
-        fieldUser.addEventListener('contextmenu', this.rotationShip.bind(this));
-        initialShips.addEventListener('mousedown', this.onMouseDown.bind(this));
-        document.addEventListener('mousemove', this.onMouseMove.bind(this));
-        document.addEventListener('mouseup', this.onMouseUp.bind(this));
+            userField.addEventListener('mousedown', this.onMouseDown.bind(this));
+            userField.addEventListener('contextmenu', this.rotationShip.bind(this));
+            initialShips.addEventListener('mousedown', this.onMouseDown.bind(this));
+            document.addEventListener('mousemove', this.onMouseMove.bind(this));
+            document.addEventListener('mouseup', this.onMouseUp.bind(this));
+        }
     }
 
     onMouseDown (e) {
