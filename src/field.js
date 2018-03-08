@@ -24,10 +24,9 @@ export default class Field {
     }
 
     randomLocationShips () {
-        // this.matrix = utils.createMatrix();
+        this.matrix = Utils.createMatrix();
         var data = this.shipsData;
-        console.log(data)
-        for (var i = 1, length = data.length; i < length; i++) {
+        for (var i = 0; i < data.length; i++) {
             var decks = data[i].size; // кол-во палуб
             var amount = data[i].amount; // кол-во кораблей
             for (var j = 0; j < amount; j++) {
@@ -95,6 +94,10 @@ export default class Field {
             }
         }
         return true;
+    }
+
+    resetMatrix () {
+        this.matrix = Utils.createMatrix();
     }
 
     cleanField () {

@@ -35,26 +35,26 @@ p {margin-bottom: 10px;}
 .text-btm {color: #4530af; text-align: center; padding-top: 10px;}
 
 .outer {margin-bottom: 20px;}
-.field {width: 366px; height: 363px; position: relative;}
-.field-user {float: left; margin-left: 38px; border: 2px solid;}
+.field {position: relative;}
+.field-user {float: left; margin-left: 38px;}
 .field-comp{float: right; margin-right: 26px;}
 
-.ships {width: 330px; height: 330px; position: relative; left: 29px; top: 27px;}
-.ship {height: 35px; position: absolute;}
+.ships {width: 300px; height: 300px; border: 2px solid;}
+.ship {height: 30px; position: absolute;}
 .ship.success{border-color: green;}
 .ship.unsuccess{border-color: red;}
-.vertical {transform: rotate(90deg); transform-origin: 17.5px 17.5px;}
+.vertical {transform: rotate(90deg); transform-origin: 15px 15px;}
 
-.fourdeck {width: 134px;}
-.tripledeck {width: 101px;}
-.doubledeck {width: 68px; background-position: -270px 0;}
-.singledeck {width: 35px; background-position: -360px 0;}
+.fourdeck {width: 120px;}
+.tripledeck {width: 90px;}
+.doubledeck {width: 60px;}
+.singledeck {width: 30px;}
 
 .instruction {margin-left: 430px; -webkit-user-select: none; user-select: none;}
 .type-placement-box {line-height: 34px; padding-bottom: 18px;}
 .type-placement-box .link {font-size: 20px; border-bottom: dashed 2px #4530af; cursor: pointer;}
 
-.initial-ships li {height: 35px; position: relative; overflow: hidden; margin-top: 31px;}
+.initial-ships li {height: 35px; position: relative; overflow: hidden; margin-top: 15px;}
 .initial-ships .ship {left: 0; top: 0; float: left; cursor: move;}
 .initial-ships .tripledeck1 {left: 164px;}
 .initial-ships .tripledeck2 {left: 297px;}
@@ -64,7 +64,7 @@ p {margin-bottom: 10px;}
 .initial-ships .singledeck3 {left: 131px;}
 .initial-ships .singledeck4 {left: 197px;}
 
-.icon-field {width: 33px; height: 33px; position: absolute; z-index: 5;}
+.icon-field {width: 30px; height: 30px; position: absolute; z-index: 5;}
 .dot {background-position: -410px 0;}
 .red-cross {background-position: -410px -50px;}
 .shaded-cell {background-position: -410px -100px;}
