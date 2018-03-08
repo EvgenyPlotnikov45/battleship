@@ -1,7 +1,7 @@
 'use strict';
 
-export default {
-    createMatrix: function () {
+export default class Utils {
+    static createMatrix () {
         var x = 10, y = 10, arr = [10];
         for (var i = 0; i < x; i++) {
             arr[i] = [10];
@@ -10,10 +10,18 @@ export default {
             }
         }
         return arr;
-    },
+    }
 
-    getRandom: function (n) {
+    static getRandom (n) {
         // n - максимальное значение, которое хотим получить
         return Math.floor(Math.random() * (n + 1));
+    }
+
+    static getCoords (el) {
+        var coords = el.getBoundingClientRect();
+        return {
+            top: coords.top + pageYOffset,
+            left: coords.left + pageXOffset
+        };
     }
 };

@@ -18,10 +18,11 @@ export default class Ship {
 
     createShip () {
         var k = 0;
-        while (k < decks) {
-            var x = this.x + k * this.kx;
-            var y = this.y + k * this.ky;
+        while (k < this.decks) {
+            var x = this.x0 + k * this.kx;
+            var y = this.y0 + k * this.ky;
             // записываем координаты корабля в матрицу игрового поля
+            console.log('x: ' + x + ' y: ' + y)
             this.field.matrix[x][y] = 1;
             // записываем координаты корабля в матрицу экземпляра корабля
             this.matrix.push([x, y]);
@@ -29,18 +30,19 @@ export default class Ship {
         }
 
         this.field.squadron.push(this);
+        this.showShip();
         // if (player == user) this.showShip();
         //TODO обработать нормально
-        // if (user.squadron.length == 10) {
-        //     getElement('play').setAttribute('data-hidden', 'false');
-        // }
+        if (this.field.squadron.length == 10) {
+            document.getElementById('play').setAttribute('data-hidden', 'false');
+        }
     }
 
     showShip () {
-        var div         = document.createElement('div'),
-            dir         = (this.kx == 1) ? ' vertical' : '',
-            classname   = this.name.slice(0, -1),
-            field      = this.field;
+        var div = document.createElement('div'),
+            dir = (this.kx == 1) ? ' vertical' : '',
+            classname = this.name.slice(0, -1),
+            field = this.field;
 
         var left = this.y0 * this.field.shipSize;
         var top = this.x0 * this.field.shipSize;

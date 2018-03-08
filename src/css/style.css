@@ -6,7 +6,7 @@ img {border: none;}
 
 /* grid */
 html, body, .wrap {height: 100%;}
-.ship, .icon-field {background: url('../images/sprite.png') no-repeat;}
+.ship, .icon-field {border: 2px solid;}
 
 body {font-size: 18px; line-height: 24px; color: #4530af;}
 p {margin-bottom: 10px;}
@@ -36,11 +36,11 @@ p {margin-bottom: 10px;}
 
 .outer {margin-bottom: 20px;}
 .field {width: 366px; height: 363px; position: relative;}
-.field-user {float: left; margin-left: 38px;}
+.field-user {float: left; margin-left: 38px; border: 2px solid;}
 .field-comp{float: right; margin-right: 26px;}
 
 .ships {width: 330px; height: 330px; position: relative; left: 29px; top: 27px;}
-.ship {height: 35px; position: absolute; border: 2px;}
+.ship {height: 35px; position: absolute;}
 .ship.success{border-color: green;}
 .ship.unsuccess{border-color: red;}
 .vertical {transform: rotate(90deg); transform-origin: 17.5px 17.5px;}

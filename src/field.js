@@ -1,9 +1,10 @@
 'use strict';
 
-import utils from 'utils';
+import Utils from 'utils';
+import Ship from 'ship';
 
 export default class Field {
-    constructor () {
+    constructor (element) {
         this.size = 300;
         this.shipSize = 30;
         this.shipsData  = [
@@ -19,11 +20,13 @@ export default class Field {
         this.elementRight = this.elementY + this.size;
         this.elementBtm = this.elementX + this.size;
         this.squadron = [];
+        this.matrix = Utils.createMatrix();
     }
 
     randomLocationShips () {
-        this.matrix = utils.createMatrix();
+        // this.matrix = utils.createMatrix();
         var data = this.shipsData;
+        console.log(data)
         for (var i = 1, length = data.length; i < length; i++) {
             var decks = data[i].size; // кол-во палуб
             var amount = data[i].amount; // кол-во кораблей
@@ -33,24 +36,24 @@ export default class Field {
                 fc.decks = decks;
                 fc.shipname = data[i].type + String(j + 1);
                 // создаём экземпляр корабля и выводим на экран
-                // var ship = new Ships(this, fc);
-                // ship.createShip();
+                var ship = new Ship(this, fc);
+                ship.createShip();
             }
         }
     }
 
     getCoordinatesDecks (decks) {
         // kx == 1 - вертикально, ky == 1 - горизонтально
-        var kx = utils.getRandom(1),
+        var kx = Utils.getRandom(1),
             ky = (kx == 0) ? 1 : 0,
             x, y;
 
         if (kx == 0) {
-            x = utils.getRandom(9);
-            y = utils.getRandom(10 - decks);
+            x = Utils.getRandom(9);
+            y = Utils.getRandom(10 - decks);
         } else {
-            x = utils.getRandom(10 - decks);
-            y = utils.getRandom(9);
+            x = Utils.getRandom(10 - decks);
+            y = Utils.getRandom(9);
         }
 
         // валидация палуб корабля
