@@ -11,4 +11,8 @@ export default class Game {
             '<div id="text_btm" class="text-btm"></div>' +
         '</div>');
     }
+
+    startGame() {
+        
+    }
 };

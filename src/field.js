@@ -93,4 +93,16 @@ export default class Field {
         }
         return true;
     }
+
+    cleanField () {
+        var parent  = this.element,
+            id      = parent.getAttribute('id'),
+            divs    = document.querySelectorAll('#' + id + ' > div');
+
+        [].forEach.call(divs, function(el) {
+            parent.removeChild(el);
+        });
+        // очищаем массив объектов кораблей
+        this.squadron.length = 0;
+    }
 };
