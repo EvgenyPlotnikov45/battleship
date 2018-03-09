@@ -43,10 +43,10 @@ export default class Game {
     startBattle () {
         document.getElementById('instruction').remove();
         // показываем поле компьютера, создаём объект поля компьютера и расставляем корабли
-
-        var compfield = document.getElementById('field_comp');
-        var comp = new Field(compfield);
-        comp.randomLocationShips();
+        var computer = this.createPlayer();
+        computer.randomLocationShips();
+        computer.show();
+        document.getElementById('play').setAttribute('data-hidden', true);
 
         // удаляем события с поля игрока (отмена редактирования расстановки кораблей)
         // userfield.removeEventListener('mousedown', user.onMouseDown);
@@ -57,7 +57,7 @@ export default class Game {
         // });
 
         // Запуск модуля игры
-        var controller = new BattleController();
+        var controller = new BattleController(this.players[0], computer);
     }
 
     createPlayer () {

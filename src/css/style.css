@@ -6,7 +6,7 @@ img {border: none;}
 
 /* grid */
 html, body, .wrap {height: 100%;}
-.ship, .icon-field {border: 2px solid;}
+.ship {border: 2px solid;}
 
 body {font-size: 18px; line-height: 24px; color: #4530af;}
 p {margin-bottom: 10px;}
@@ -71,6 +71,25 @@ p {margin-bottom: 10px;}
 .initial-ships .ship {left: 0; top: 0; float: left; cursor: move;}
 
 .icon-field {width: 30px; height: 30px; position: absolute; z-index: 5;}
-.dot {background-position: -410px 0;}
-.red-cross {background-position: -410px -50px;}
+.red-cross {
+    font-size: 30px;
+    text-align: center;
+    line-height: 100%;
+    transform: rotate(45deg);
+    color: red;
+    font-weight: bold;
+}
+.red-cross:after {
+    content: '+';
+}
 .shaded-cell {background-position: -410px -100px;}
+.dot {
+    margin: -15%;
+    width: 30%;
+    height: 30%;
+    background-color: blue;
+    border-radius: 100%;
+    position: relative;
+    top: 50%;
+    left: 50%;
+}
