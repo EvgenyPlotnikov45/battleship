@@ -13,17 +13,14 @@ export default class Configurator {
 
     generateConfiguratorMarkup() {
         var mainContainer = document.getElementById('main');
-        mainContainer.insertAdjacentHTML('afterBegin', '' +
-        '<div class="field field-user">' +
-            '<div id="field_user" class="ships"></div>' +
-        '</div>' +
+        mainContainer.insertAdjacentHTML('beforeEnd', '' +
         '<div id="instruction" class="instruction" data-hidden="false">' +
             '<div id="type_placement" class="type-placement-box">' +
                 '<span class="link" data-target="random">Расставить автоматически</span><br>' +
                 '<span class="link" data-target="manually">Ручная расстановка</span>' +
             '</div>' +
             '<div id="ships_collection" class="ships-collection" data-hidden="true">' +
-                '<p>Перетащите мышкой корабли на игровое поле. Для установки корабля по вертикали, кликните по нему правой кнопкой мышки.</p>' +
+                '<p>Перетащите корабли на поле.<br>ПКМ - поворот корабля.</p>' +
                 '<ul id="initial_ships" class="initial-ships">' +
                 '</ul>' +
             '</div>' +
@@ -49,9 +46,8 @@ export default class Configurator {
         }
     }
 
-    startConfigure() {
-        var fieldElement = document.getElementById('field_user');
-        this.field = new Field(fieldElement);
+    startConfigure(field) {
+        this.field = field;
         console.log(this.field);
         var typePlacement = document.getElementById('type_placement');
         typePlacement.addEventListener('click', this.onTypePlacementClick.bind(this));
@@ -115,7 +111,7 @@ export default class Configurator {
 
         // нажатие мыши произошло по установленному кораблю, находящемуся
         // в игровом поле юзера (редактирование положения корабля)
-        if (el.parentElement.getAttribute('id') == 'field_user') {
+        if (el.parentElement.getAttribute('id') == this.field.element.getAttribute('id')) {
             var name = el.getAttribute('id');
             this.getDirectionShip(name);
 
@@ -220,7 +216,7 @@ export default class Configurator {
                 var ship = new Ship(user, shipConfig);
                 ship.createShip();
                 document.getElementById(ship.name).style.zIndex = null;
-                document.getElementById('field_user').removeChild(this.clone);
+                user.element.removeChild(this.clone);
             } else {
                 this.clone.rollback();
                 if (this.draggable.left !== undefined && this.draggable.top !== undefined) {
@@ -273,7 +269,7 @@ export default class Configurator {
         }
     }
 
-    getCoordsClone () {
+    getCoordsClone (decks) {
         var user = this.field,
             pos     = this.clone.getBoundingClientRect(),
             left    = pos.left - user.elementY,
@@ -284,10 +280,10 @@ export default class Configurator {
 
         coords.left = (left < 0) ? 0 : (right > user.size) ? user.size - user.shipSize * decks : left;
         coords.left = Math.round(coords.left / user.shipSize) * user.shipSize;
-        coords.top  = (top < 0) ? 0 : (bottom > user.fieldSide) ? user.fieldSize - user.shipSize : top;
-        coords.top  = Math.round(coords.top / user.shipSize) * user.shipSize;
-        coords.x    = coords.top / user.shipSize;
-        coords.y    = coords.left / user.shipSize;
+        coords.top = (top < 0) ? 0 : (bottom > user.fieldSide) ? user.fieldSize - user.shipSize : top;
+        coords.top = Math.round(coords.top / user.shipSize) * user.shipSize;
+        coords.x = coords.top / user.shipSize;
+        coords.y = coords.left / user.shipSize;
 
         return coords;
     }

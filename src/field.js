@@ -4,7 +4,7 @@ import Utils from 'utils';
 import Ship from 'ship';
 
 export default class Field {
-    constructor (element) {
+    constructor (fieldElement) {
         this.size = 300;
         this.shipSize = 30;
         this.shipsData  = [
@@ -14,13 +14,38 @@ export default class Field {
             {type: 'singledeck', amount: 4, size: 1}
         ];
 
-        this.element = element;
-        this.elementX = element.getBoundingClientRect().top + pageYOffset;
-        this.elementY = element.getBoundingClientRect().left + pageXOffset;
-        this.elementRight = this.elementY + this.size;
-        this.elementBtm = this.elementX + this.size;
+        this.wrapper = fieldElement;
+        this.element = fieldElement.firstChild;
+        // this.elementX = element.getBoundingClientRect().top + pageYOffset;
+        // this.elementY = element.getBoundingClientRect().left + pageXOffset;
+        // this.elementRight = this.elementY + this.size;
+        // this.elementBtm = this.elementX + this.size;
         this.squadron = [];
         this.matrix = Utils.createMatrix();
+    }
+
+    get elementX () {
+        return this.element.getBoundingClientRect().top + pageYOffset;
+    }
+
+    get elementY () {
+        return this.element.getBoundingClientRect().left + pageXOffset;
+    }
+
+    get elementRight () {
+        return this.elementY + this.size;
+    }
+
+    get elementBtm () {
+        return this.elementX + this.size;
+    }
+
+    show () {
+        this.wrapper.setAttribute('data-hidden', false);
+    }
+
+    hide () {
+        this.wrapper.setAttribute('data-hidden', true);
     }
 
     randomLocationShips () {

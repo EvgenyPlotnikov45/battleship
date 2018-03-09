@@ -27,19 +27,25 @@ p {margin-bottom: 10px;}
 .clearfix:before, .clearfix:after {display:table; content:'';}
 .clearfix:after {clear:both;}
 
-[data-hidden="true"] {display:none;}
-[data-hidden="false"], .block {display:block;}
+[data-hidden="true"] {display:none !important;}
+.block {display:block;}
 
 .wrapper {width: 860px; height: 530px; position: relative; margin: 0 auto;}
 .text-top {font-size: 30px; line-height: 70px; text-align: center; margin-bottom: 10px;}
 .text-btm {color: #4530af; text-align: center; padding-top: 10px;}
 
 .outer {margin-bottom: 20px;}
-.field {position: relative;}
-.field-user {float: left; margin-left: 38px;}
-.field-comp{float: right; margin-right: 26px;}
+.field {
+    position: relative;
+    display: inline-block;
+    margin-left: 90px;
+}
 
-.ships {width: 300px; height: 300px; border: 2px solid;}
+.ships {
+    width: 300px;
+    height: 300px;
+    border: 2px solid;
+}
 .ship {height: 30px; position: absolute;}
 .ship.success{border-color: green;}
 .ship.unsuccess{border-color: red;}
@@ -50,19 +56,19 @@ p {margin-bottom: 10px;}
 .doubledeck {width: 60px;}
 .singledeck {width: 30px;}
 
-.instruction {margin-left: 430px; -webkit-user-select: none; user-select: none;}
+.instruction {
+    -webkit-user-select: none;
+    user-select: none;
+    vertical-align: top;
+    margin-left: 30px;
+    display: inline-block;
+}
+
 .type-placement-box {line-height: 34px; padding-bottom: 18px;}
 .type-placement-box .link {font-size: 20px; border-bottom: dashed 2px #4530af; cursor: pointer;}
 
-.initial-ships li {height: 35px; position: relative; overflow: hidden; margin-top: 15px;}
+.initial-ships li {height: 35px; position: relative; overflow: hidden; margin-top: 10px;}
 .initial-ships .ship {left: 0; top: 0; float: left; cursor: move;}
-.initial-ships .tripledeck1 {left: 164px;}
-.initial-ships .tripledeck2 {left: 297px;}
-.initial-ships .doubledeck2 {left: 99px;}
-.initial-ships .doubledeck3 {left: 197px;}
-.initial-ships .singledeck2 {left: 65px;}
-.initial-ships .singledeck3 {left: 131px;}
-.initial-ships .singledeck4 {left: 197px;}
 
 .icon-field {width: 30px; height: 30px; position: absolute; z-index: 5;}
 .dot {background-position: -410px 0;}
