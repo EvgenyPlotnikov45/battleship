@@ -59,6 +59,7 @@ export default class Game {
 
         // Запуск модуля игры
         var controller = new BattleController(this.players);
+        controller.startBattle();
     }
 
     createPlayer (type) {

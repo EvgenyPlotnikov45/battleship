@@ -1,6 +1,8 @@
 'use strict';
 
 import Utils from 'utils';
+import Field from 'field';
+import Computer from 'computer';
 
 export default class BattleController {
     constructor (players) {
@@ -8,8 +10,8 @@ export default class BattleController {
         this.players = players;
         this.user = players[0];
         this.comp = players[1];
-        console.log(this.user);
-        console.log(this.comp);
+        console.log(this.user instanceof Field);
+        console.log(this.comp instanceof Computer);
         // if (this.player === this.user) {
         //     // устанавливаем обработчики событий для пользователя
         //     this.comp.element.onclick = this.shoot.bind(this);
@@ -23,13 +25,29 @@ export default class BattleController {
     startBattle () {
         let players = this.players;
         //TODO нужно рандомно отсортировать массив players
-        let index = this.index % this.players.length;
-        let player = players[index];
+        this.nextStep();
+    }
 
+    nextStep () {
+        let index = this.index % this.players.length;
+        let currentPlayer = this.players[index];
+        if (currentPlayer instanceof Computer) {
+            // this.showServiseText('Первым стреляет компьютер.');
+            this.enemy = this.players[0];
+            setTimeout(() => this.shoot(), 500);
+        } else {
+            // устанавливаем обработчики событий для пользователя
+            for (let player of this.players) {
+                if (player !== currentPlayer) {
+                    player.element.onclick = this.shoot.bind(this);
+                }
+            }
+            // this.showServiseText('Вы стреляете первым.');
+        }
     }
 
     /**
-     * По элементу определяем
+     * По элементу определяем и возвращаем обьект игрока
      * @param  {HTMLElement}
      * @return {Field}
      */
@@ -52,11 +70,7 @@ export default class BattleController {
             this.coords = this.transformCoordinates(e, this.enemy);
         } else {
             // генерируются матричные координаты выстрела компьютера
-            if (this.comp.needShootMatrix.length) {
-                this.needShoot();
-            } else {
-                this.getCoordinatesShot();
-            }
+            this.coords = this.player.getCoordinates();
         }
 
         var matrixValue = this.enemy.matrix[this.coords.x][this.coords.y];
@@ -70,6 +84,7 @@ export default class BattleController {
                 this.hitting();
                 break;
             // обстрелянная координата
+            case 2:
             case 3:
             case 4:
                 this.alreadyHitting();
@@ -92,7 +107,7 @@ export default class BattleController {
         // необходимо найти корабль, в который попали
         var warship, arrayDescks;
         for (var i = this.enemy.squadron.length - 1; i >= 0; i--) {
-            warship     = this.enemy.squadron[i]; // вся информация о карабле эскадры
+            warship = this.enemy.squadron[i]; // вся информация о карабле эскадры
             arrayDescks = warship.matrix; // массив с координатами палуб корабля
 
             for (var j = 0; j < arrayDescks.length; j++) {
@@ -127,11 +142,11 @@ export default class BattleController {
             }
         // бой продолжается
         } else {
-            if (this.player === this.comp) {
+            if (this.player instanceof Computer) {
                 // отмечаем клетки, где точно не может стоять корабль
-                this.markUnnecessaryCell();
+                this.player.markUnnecessaryCell(this.coords, this.enemy);
                 // обстрел клеток вокруг попадания
-                this.getNeedCoordinatesShot();  
+                this.player.getNeedCoordinatesShot(this.coords, this.enemy);  
                 // производим новый выстрел
                 setTimeout(() => this.shoot(), 500);
             }
@@ -160,122 +175,6 @@ export default class BattleController {
         }
     }
 
-    getCoordinatesShot () {
-        var rnd, val;
-
-        if (this.comp.orderedShootMatrix.length != 0) {
-            if (this.comp.orderedShootMatrix.length > 10) {
-                rnd = Utils.getRandom(9);
-            } else {
-                rnd = Utils.getRandom(this.comp.orderedShootMatrix.length - 1);
-            }
-            val = this.comp.orderedShootMatrix.splice(rnd, 1)[0];
-        } else {
-            rnd = Utils.getRandom(this.comp.shootMatrix.length - 1),
-            val = this.comp.shootMatrix.splice(rnd, 1)[0];
-        }
-
-        this.coords = {
-            x: val[0],
-            y: val[1]
-        };
-
-        this.deleteElementMatrix(this.comp.shootMatrix, this.coords);
-    }
-
-    getNeedCoordinatesShot () {
-        var kx = 0, ky = 0;
-
-        if (Object.keys(this.comp.firstHit).length === 0) {
-            this.comp.firstHit = this.coords;
-        } else {
-            this.comp.lastHit = this.coords;
-            kx = (Math.abs(this.comp.firstHit.x - this.comp.lastHit.x) == 1) ? 1 : 0;
-            ky = (Math.abs(this.comp.firstHit.y - this.comp.lastHit.y) == 1) ? 1 : 0;
-            this.comp.firstHit = this.comp.lastHit;
-            this.comp.lastHit = {};
-        }
-
-        if (this.coords.x > 0 && ky == 0) this.comp.needShootMatrix.push([this.coords.x - 1, this.coords.y]);
-        if (this.coords.x < 9 && ky == 0) this.comp.needShootMatrix.push([this.coords.x + 1, this.coords.y]);
-        if (this.coords.y > 0 && kx == 0) this.comp.needShootMatrix.push([this.coords.x, this.coords.y - 1]);
-        if (this.coords.y < 9 && kx == 0) this.comp.needShootMatrix.push([this.coords.x, this.coords.y + 1]);
-
-        for (var i = this.comp.needShootMatrix.length - 1; i >= 0; i--) {
-            var x = this.comp.needShootMatrix[i][0],
-                y = this.comp.needShootMatrix[i][1];
-            //удаляем точки, по которым уже проводился обстрел или стрельба не имеет смысла
-            if (this.user.matrix[x][y] != 0 && this.user.matrix[x][y] != 1) {
-                this.comp.needShootMatrix.splice(i,1);
-                this.deleteElementMatrix(this.comp.shootMatrix, this.coords);
-                if (this.comp.orderedShootMatrix.length != 0) {
-                    this.deleteElementMatrix(this.comp.orderedShootMatrix, this.coords);
-                }
-            }
-        }
-        return;
-    }
-
-    needShoot () {
-        var val = this.comp.needShootMatrix.shift();
-        this.coords = {
-            x: val[0],
-            y: val[1]
-        }
-
-        // удаляем координаты по которым произошел выстрел
-        this.deleteElementMatrix(this.comp.shootMatrix, this.coords);
-        if (this.comp.orderedShootMatrix.length != 0) {
-            this.deleteElementMatrix(this.comp.orderedShootMatrix, this.coords);
-        }
-    }
-
-    markUnnecessaryCell () {
-        var icons   = this.user.element.querySelectorAll('.icon-field'),
-            coords = this.coords,
-            points  = [
-                        [coords.x - 1, coords.y - 1],
-                        [coords.x - 1, coords.y + 1],
-                        [coords.x + 1, coords.y - 1],
-                        [coords.x + 1, coords.y + 1]
-                    ];
-
-        for (var i = 0; i < 4; i++) {
-            var flag = true;
-            if (points[i][0] < 0 || points[i][0] > 9 || points[i][1] < 0 || points[i][1] > 9) continue; // за пределами игрового поля
-
-            // поиск совпадения с иконкой можно реализовать и через forEach, но в этом случае
-            // будет просмотренна вся коллекция иконок, к концу боя она может быть близка к 100
-            // при поиске через for(), можно прервать цикл при совпадении
-            for (var j = 0; j < icons.length; j++) {
-                var x = icons[j].style.top.slice(0, -2) / this.user.shipSize,
-                    y = icons[j].style.left.slice(0, -2) / this.user.shipSize;
-                if (points[i][0] == x && points[i][1] == y) {
-                    flag = false;
-                    break;
-                }
-            }
-            if (flag === false) continue;
-
-            var obj = {
-                x: points[i][0],
-                y: points[i][1]
-            }
-            this.showIcons(this.enemy, obj, 'shaded-cell');
-            this.user.matrix[obj.x][obj.y] = 2;
-
-            // удаляем из массивов выстрелов ненужные координаты
-            this.deleteElementMatrix(this.comp.shootMatrix, obj);
-            if (this.comp.needShootMatrix.length != 0) {
-                this.deleteElementMatrix(this.comp.needShootMatrix, obj);
-            }
-
-            if (this.comp.orderedShootMatrix.length != 0) {
-                this.deleteElementMatrix(this.comp.orderedShootMatrix, obj);
-            }
-        }
-    }
-
     transformCoordinates (e, instance) {
         var obj = {};
         obj.x = Math.trunc((e.pageY - instance.elementX) / instance.shipSize),
@@ -297,13 +196,5 @@ export default class BattleController {
         var srvText = document.getElementById('text_btm');
         srvText.innerHTML = '';
         srvText.innerHTML = text;
-    }
-
-    deleteElementMatrix (array, obj) {
-        for (var i = array.length - 1; i >= 0; i--) {
-            if (array[i][0] == obj.x && array[i][1] == obj.y) {
-                var el = array.splice(i, 1);
-            }
-        }
     }
 };
