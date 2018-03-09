@@ -16,12 +16,9 @@ export default class Field {
 
         this.wrapper = fieldElement;
         this.element = fieldElement.firstChild;
-        // this.elementX = element.getBoundingClientRect().top + pageYOffset;
-        // this.elementY = element.getBoundingClientRect().left + pageXOffset;
-        // this.elementRight = this.elementY + this.size;
-        // this.elementBtm = this.elementX + this.size;
         this.squadron = [];
         this.matrix = Utils.createMatrix();
+        this.hiddenShips = [];
     }
 
     get elementX () {
@@ -135,5 +132,23 @@ export default class Field {
         });
         // очищаем массив объектов кораблей
         this.squadron.length = 0;
+    }
+
+    hideShips () {
+        let element = this.element;
+        let hiddenShips = this.hiddenShips;
+        let ships = element.querySelectorAll('div.ship');
+        for (let ship of ships) {
+            hiddenShips.push(element.removeChild(ship));
+        }
+    }
+
+    showShips () {
+        var element = this.element;
+        var hiddenShips = this.hiddenShips;
+        for (let ship of hiddenShips) {
+            element.appendChild(ship);
+        }
+        hiddenShips = [];
     }
 };

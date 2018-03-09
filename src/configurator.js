@@ -48,7 +48,6 @@ export default class Configurator {
 
     startConfigure(field) {
         this.field = field;
-        console.log(this.field);
         var typePlacement = document.getElementById('type_placement');
         typePlacement.addEventListener('click', this.onTypePlacementClick.bind(this));
     }

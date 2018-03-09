@@ -3,6 +3,7 @@
 import Configurator from 'configurator';
 import BattleController from 'battlecontroller';
 import Field from 'field';
+import Computer from 'computer';
 
 export default class Game {
 
@@ -43,7 +44,7 @@ export default class Game {
     startBattle () {
         document.getElementById('instruction').remove();
         // показываем поле компьютера, создаём объект поля компьютера и расставляем корабли
-        var computer = this.createPlayer();
+        var computer = this.createPlayer('computer');
         computer.randomLocationShips();
         computer.show();
         document.getElementById('play').setAttribute('data-hidden', true);
@@ -57,10 +58,10 @@ export default class Game {
         // });
 
         // Запуск модуля игры
-        var controller = new BattleController(this.players[0], computer);
+        var controller = new BattleController(this.players);
     }
 
-    createPlayer () {
+    createPlayer (type) {
         var id = this.players.length + 1;
         var fieldElement = document.createElement('div');
         fieldElement.classList.add('field');
@@ -69,7 +70,17 @@ export default class Game {
         shipsElement.classList.add('ships');
         shipsElement.setAttribute('id', 'player' + id);
         fieldElement.appendChild(shipsElement);
-        var field = new Field(fieldElement);
+        var field;
+        switch (type) {
+            case 'computer':
+                field = new Computer(fieldElement);
+                break;
+            case 'user':
+                break;
+            default:
+                field = new Field(fieldElement);
+
+        }
         this.players.push(field);
         document.getElementById('main').appendChild(fieldElement);
         return field;
