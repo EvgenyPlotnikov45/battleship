@@ -5,6 +5,8 @@ import Ship from 'ship';
 
 export default class Field {
     constructor (fieldElement) {
+        this.index = 0;
+        this.active = true;
         this.size = 300;
         this.shipSize = 30;
         this.shipsData  = [
@@ -35,6 +37,10 @@ export default class Field {
 
     get elementBtm () {
         return this.elementX + this.size;
+    }
+
+    get fullName () {
+        return this.name + this.index;
     }
 
     show () {
@@ -150,5 +156,30 @@ export default class Field {
             element.appendChild(ship);
         }
         hiddenShips = [];
+    }
+
+    getShipByCoord (coords) {
+        let arrayDescks;
+        for (let i = this.squadron.length - 1; i >= 0; i--) {
+            arrayDescks = this.squadron[i].matrix; // массив с координатами палуб корабля
+            for (let j = 0; j < arrayDescks.length; j++) {
+                if (arrayDescks[j][0] == coords.x && arrayDescks[j][1] == coords.y) {
+                    return this.squadron[i];
+                }
+            }
+        }
+    }
+
+    deleteShip (ship) {
+        for (let i = 0; i < this.squadron.length; i++) {
+            if (this.squadron[i] === ship) {
+                this.squadron.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    hasShips () {
+        return !!this.squadron.length;
     }
 };

@@ -1,48 +1,82 @@
 'use strict';
 
 import Utils from 'utils';
-import Field from 'field';
+import User from 'user';
 import Computer from 'computer';
 
 export default class BattleController {
     constructor (players) {
         this.index = 0;
         this.players = players;
-        this.user = players[0];
-        this.comp = players[1];
-        console.log(this.user instanceof Field);
-        console.log(this.comp instanceof Computer);
-        // if (this.player === this.user) {
-        //     // устанавливаем обработчики событий для пользователя
-        //     this.comp.element.onclick = this.shoot.bind(this);
-        //     this.showServiseText('Вы стреляете первым.');
-        // } else {
-        //     this.showServiseText('Первым стреляет компьютер.');
-        //     setTimeout(() => this.shoot(), 500);
-        // }
+        console.log(this.players)
     }
 
     startBattle () {
-        let players = this.players;
         //TODO нужно рандомно отсортировать массив players
+        let players = this.players;
         this.nextStep();
     }
 
     nextStep () {
+        if (this.player && this.player instanceof User) this.clearEvents();
+        if (this.checkEndGame()) return;
+
         let index = this.index % this.players.length;
-        let currentPlayer = this.players[index];
-        if (currentPlayer instanceof Computer) {
-            // this.showServiseText('Первым стреляет компьютер.');
+        this.player = this.players[index];
+        this.index++;
+
+        if (!this.player.active) {
+            this.nextStep();
+        }
+
+        if (this.player instanceof Computer) {
             this.enemy = this.players[0];
             setTimeout(() => this.shoot(), 500);
         } else {
             // устанавливаем обработчики событий для пользователя
-            for (let player of this.players) {
-                if (player !== currentPlayer) {
-                    player.element.onclick = this.shoot.bind(this);
-                }
+            this.listenEvents();
+        }
+
+        this.showText(`Игрок ${this.player.fullName} стреляет.`);
+    }
+
+    /**
+     * Проверка окончания игры, если остались активные игроки, то игра продолжается.
+     * Если активный игрок только один, то игра заканчивается.
+     * @return {Boolean}
+     */
+    checkEndGame () {
+        let activePlayers = 0;
+        for (let player of this.players) {
+            if (player.active) activePlayers++;
+        }
+
+        if (activePlayers > 1) {
+            return false;
+        } else {
+            this.showText(`Игрок ${this.player.fullName} победил.`);
+            return true;
+        }
+    }
+
+    /**
+     * Подписываем игрока на клик по полям других игроков.
+     */
+    listenEvents () {
+        for (let player of this.players) {
+            if (player !== this.player && player.active) {
+                player.element.onclick = this.shoot.bind(this);
             }
-            // this.showServiseText('Вы стреляете первым.');
+        }
+    }
+
+    /**
+     * Очищаем обработчики событий
+     * @return {Field}
+     */
+    clearEvents () {
+        for (let player of this.players) {
+            player.element.onclick = null;
         }
     }
 
@@ -60,6 +94,10 @@ export default class BattleController {
         }
     }
 
+    /**
+     * Функция обработки выстрела
+     * @param  {Event}
+     */
     shoot (e) {
         // e !== undefined - значит выстрел производит игрок
         // координаты поступают по клику в px и преобразуются в координаты матрицы (coords)
@@ -67,7 +105,7 @@ export default class BattleController {
             if (e.which != 1) return false;
             // получаем координаты выстрела
             this.enemy = this.getFieldByElement(e.currentTarget);
-            this.coords = this.transformCoordinates(e, this.enemy);
+            this.coords = this.transformCoordinates(e.pageX, e.pageY);
         } else {
             // генерируются матричные координаты выстрела компьютера
             this.coords = this.player.getCoordinates();
@@ -84,7 +122,6 @@ export default class BattleController {
                 this.hitting();
                 break;
             // обстрелянная координата
-            case 2:
             case 3:
             case 4:
                 this.alreadyHitting();
@@ -92,10 +129,18 @@ export default class BattleController {
         }
     }
 
+    missing () {
+        // устанавливаем иконку промаха и записываем промах в матрицу
+        this.showIcons(this.enemy, this.coords, 'dot');
+        this.enemy.matrix[this.coords.x][this.coords.y] = 3;
+
+        this.showText(`Игрок ${this.player.fullName} промахнулся.`);
+        this.nextStep();
+    }
+
     alreadyHitting () {
-        if (this.player == this.user) {
-            var text = 'По этим координатам уже стреляли';
-            this.showServiseText(text);
+        if (this.player instanceof User) {
+            this.showText('По этим координатам уже стреляли.');
         }
     }
 
@@ -105,42 +150,19 @@ export default class BattleController {
 
         // вносим изменения в массив эскадры
         // необходимо найти корабль, в который попали
-        var warship, arrayDescks;
-        for (var i = this.enemy.squadron.length - 1; i >= 0; i--) {
-            warship = this.enemy.squadron[i]; // вся информация о карабле эскадры
-            arrayDescks = warship.matrix; // массив с координатами палуб корабля
-
-            for (var j = 0; j < arrayDescks.length; j++) {
-                // если координаты одной из палуб корабля совпали с координатами выстрела
-                // увеличиванием счётчик попаданий
-                if (arrayDescks[j][0] == this.coords.x && arrayDescks[j][1] == this.coords.y) {
-                    warship.hits++;
-                    // если кол-во попаданий в корабль становится равным кол-ву палуб
-                    // считаем этот корабль уничтоженным и удаляем его из эскадры
-                    if (warship.hits == warship.decks) {
-                        this.enemy.squadron.splice(i, 1);
-                    } else {
-                        var text = (this.player === this.user) ? 'Поздравляем! Вы попали. Ваш выстрел.' : 'Компьютер попал в ваш корабль. Выстрел компьютера';
-                        this.showServiseText(text);
-                    }
-                    break;
-                }
-            }
+        let ship = this.enemy.getShipByCoord(this.coords);
+        ship.hits++;
+        // если кол-во попаданий в корабль становится равным кол-ву палуб
+        // считаем этот корабль уничтоженным и удаляем его
+        if (ship.hits == ship.decks) {
+            this.enemy.deleteShip(ship);
         }
 
-        // игра закончена, все корбали эскадры противника уничтожены
-        if (this.enemy.squadron.length == 0) {
-            var text = (this.player === this.user) ? 'Поздравляем! Вы выиграли.' : 'К сожалению, вы проиграли.';
-            this.showServiseText(text);
+        this.showText(`Игрок ${this.player.fullName} попал в игрока ${this.enemy.fullName}`);
 
-            if (this.player == this.user) {
-                // снимаем обработчики событий для пользователя
-                this.comp.element.onclick = null;
-            } else {
-                //если выиграл комп., показываем оставшиеся корабли компьютера
-                this.comp.showShips();
-            }
-        // бой продолжается
+        if (!this.enemy.hasShips()) {
+            this.enemy.active = false;
+            this.checkEndGame();
         } else {
             if (this.player instanceof Computer) {
                 // отмечаем клетки, где точно не может стоять корабль
@@ -153,32 +175,10 @@ export default class BattleController {
         }
     }
 
-    missing () {
-        // устанавливаем иконку промаха и записываем промах в матрицу
-        this.showIcons(this.enemy, this.coords, 'dot');
-        this.enemy.matrix[this.coords.x][this.coords.y] = 3;
-
-        var text = (this.player === this.user) ? 'Вы промахнулись. Стреляет компьютер.' : 'Компьютер промахнулся. Ваш выстрел.';
-        this.showServiseText(text);
-
-        // определяем, чей выстрел следующий
-        this.player = (this.player === this.user) ? this.comp : this.user;
-        this.enemy = (this.player === this.user) ? this.comp : this.user;
-
-        if (this.player == this.comp) {
-            // снимаем обработчики событий для пользователя
-            this.comp.element.onclick = null;
-            setTimeout(() => this.shoot(), 500);
-        } else {
-            // устанавливаем обработчики событий для пользователя
-            this.comp.element.onclick = this.shoot.bind(this);
-        }
-    }
-
-    transformCoordinates (e, instance) {
+    transformCoordinates (pageX, pageY) {
         var obj = {};
-        obj.x = Math.trunc((e.pageY - instance.elementX) / instance.shipSize),
-        obj.y = Math.trunc((e.pageX - instance.elementY) / instance.shipSize);
+        obj.x = Math.trunc((pageY - this.enemy.elementX) / this.enemy.shipSize),
+        obj.y = Math.trunc((pageX - this.enemy.elementY) / this.enemy.shipSize);
         return obj;
     }
 
@@ -192,7 +192,7 @@ export default class BattleController {
         this.enemy.element.appendChild(iconField);
     }
 
-    showServiseText (text) {
+    showText (text) {
         var srvText = document.getElementById('text_btm');
         srvText.innerHTML = '';
         srvText.innerHTML = text;

@@ -4,6 +4,7 @@ import Configurator from 'configurator';
 import BattleController from 'battlecontroller';
 import Field from 'field';
 import Computer from 'computer';
+import User from 'user';
 
 export default class Game {
 
@@ -29,7 +30,7 @@ export default class Game {
         btnPlay.addEventListener('click', function () {
             btnPlay.setAttribute('data-hidden', true);
             if (index === 0) {
-                var player = me.createPlayer();
+                var player = me.createPlayer('user');
                 player.show();
                 var configurator = new Configurator();
                 configurator.generateConfiguratorMarkup();
@@ -77,11 +78,13 @@ export default class Game {
                 field = new Computer(fieldElement);
                 break;
             case 'user':
+                field = new User(fieldElement);
                 break;
             default:
                 field = new Field(fieldElement);
 
         }
+        field.index = id;
         this.players.push(field);
         document.getElementById('main').appendChild(fieldElement);
         return field;
