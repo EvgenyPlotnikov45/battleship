@@ -39,6 +39,7 @@ p {margin-bottom: 10px;}
     position: relative;
     display: inline-block;
     margin-left: 90px;
+    margin-bottom: 20px;
     background-image: url('../images/1.png');
     background-size: 30px;
 }
@@ -84,7 +85,6 @@ p {margin-bottom: 10px;}
 .red-cross:after {
     content: '+';
 }
-.shaded-cell {background-position: -410px -100px;}
 .dot {
     margin: -15%;
     width: 30%;
@@ -94,4 +94,10 @@ p {margin-bottom: 10px;}
     position: relative;
     top: 50%;
     left: 50%;
+}
+#playersNumber {
+    text-align: center;
+}
+.fieldName {
+    position: absolute;
 }

@@ -53,42 +53,52 @@ export default class Configurator {
     }
 
     onTypePlacementClick (e) {
-        var me = this;
-        var el = e.target;
+        let el = e.target;
         if (el.tagName != 'SPAN') return;
-        var shipsCollection = document.getElementById('ships_collection');
-        document.getElementById('play').setAttribute('data-hidden', true);
+        let shipsCollection = document.getElementById('ships_collection');
         // очищаем матрицу
-        me.field.cleanField();
-        me.field.resetMatrix();
-        me.setObserver();
+        this.field.cleanField();
+        this.field.resetMatrix();
+        this.setObserver();
 
-        var type = el.getAttribute('data-target'),
-            typeGeneration = {
-                'random': function() {
-                    shipsCollection.setAttribute('data-hidden', true);
-                    me.field.randomLocationShips();
-                },
-                'manually': function() {
-                    me.generateShipCollection();
-                    shipsCollection.setAttribute('data-hidden', false);
-                }
-            };
-        typeGeneration[type]();
+        if (el.getAttribute('data-target') === 'random') {
+            shipsCollection.setAttribute('data-hidden', true);
+            this.field.randomLocationShips();
+        } else {
+            this.generateShipCollection();
+            shipsCollection.setAttribute('data-hidden', false);
+        }
     }
 
     setObserver () {
         if (!this.hasObservers) {
             this.hasObservers = true;
-            var userField = this.field.element;
-            var initialShips = document.getElementById('ships_collection');
+            let userField = this.field.element;
+            let initialShips = document.getElementById('ships_collection');
+            let playBtn = document.getElementById('play');
 
-            userField.addEventListener('mousedown', this.onMouseDown.bind(this));
-            userField.addEventListener('contextmenu', this.rotationShip.bind(this));
-            initialShips.addEventListener('mousedown', this.onMouseDown.bind(this));
-            document.addEventListener('mousemove', this.onMouseMove.bind(this));
-            document.addEventListener('mouseup', this.onMouseUp.bind(this));
+            userField.onmousedown = this.onMouseDown.bind(this);
+            userField.oncontextmenu = this.rotationShip.bind(this);
+            initialShips.onmousedown = this.onMouseDown.bind(this);
+            document.onmousemove = this.onMouseMove.bind(this);
+            document.onmouseup = this.onMouseUp.bind(this);
+            playBtn.onmouseup = this.onPlayBtnMouseUp.bind(this);
         }
+    }
+
+    /**
+     * При нажатии на кнопку play мы завершаем конфигурирование, поэтому
+     * скидываем все обработчики и очищаем инструкцию
+     */
+    onPlayBtnMouseUp () {
+        this.field.element.onmousedown = null;
+        this.field.element.oncontextmenu = null;
+        document.getElementById('ships_collection').onmousedown = null;
+        document.onmousemove = null;
+        document.onmouseup = null;
+        document.getElementById('play').onmouseup = null;
+        document.getElementById('instruction').remove();
+        this.field.hide();
     }
 
     onMouseDown (e) {
@@ -113,13 +123,12 @@ export default class Configurator {
         if (el.parentElement.getAttribute('id') == this.field.element.getAttribute('id')) {
             var name = el.getAttribute('id');
             this.getDirectionShip(name);
-
             var computedStyle   = getComputedStyle(el);
             this.draggable.left = computedStyle.left.slice(0, -2);
             this.draggable.top  = computedStyle.top.slice(0, -2);
-
             this.cleanShip(el);
         }
+
         return false;
     }
 
@@ -128,7 +137,7 @@ export default class Configurator {
 
         if (!this.clone) {
             this.clone = this.creatClone(e);
-            // еслине удалось создать clone
+            // если не удалось создать clone
             if (!this.clone) return;
             
             var coords = Utils.getCoords(this.clone);

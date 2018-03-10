@@ -10,12 +10,23 @@ export default class Game {
 
     constructor () {
         this.players = [];
+        this.numberUser = null;
+        this.numberComputer = null;
     }
 
+    /**
+     * Генерация базовой разметки игры
+     */
     generateBasicMarkup() {
         document.body.insertAdjacentHTML('afterBegin', '' +
         '<div class="wrapper">' +
             '<div id="text_top" class="text-top">BattleShip</div>' +
+            '<div id="playersNumber">' +
+                '<span>Количество игроков: </span>' +
+                '<input id="userNumber" type="number" min="0" max="3" value="1"><br>' +
+                '<span>Количество компьютеров: </span>' +
+                '<input id="computerNumber" type="number" min="0" max="3" value="1">' +
+            '</div>' +
             '<div id="main" class="main clearfix">' +
             '</div>' +
             '<span id="play" class="btn-play">Играть</span>' +
@@ -23,59 +34,89 @@ export default class Game {
         '</div>');
     }
 
-    startGame() {
-        var me = this;
-        var btnPlay = document.getElementById('play');
-        var index = 0;
-        btnPlay.addEventListener('click', function () {
+    /**
+     * Валидация входных данных о количестве игроков и компьютеров.
+     * Если валидация проходит успешно, то данные записываются.
+     */
+    saveNumberPlayers () {
+        if (this.userNumber && this.computerNumber) return true;
+
+        let userNumber = document.getElementById('userNumber').value;
+        let computerNumber = document.getElementById('computerNumber').value;
+        if (!(userNumber >= 0 && userNumber <= 3) || !(computerNumber >= 0 && computerNumber <= 3)) {
+            let text = 'Укажите количество игроков и компьютеров от 0 до 3'
+            document.getElementById('text_btm').innerHTML = text;
+            return false;
+        }
+
+        this.userNumber = userNumber;
+        this.computerNumber = computerNumber;
+        document.getElementById('playersNumber').remove();
+        document.getElementById('text_btm').innerHTML = '';
+        return true;
+    }
+
+    /**
+     * Запускаем игру. Подписавшись на событие click кнопки play
+     * запускаем конфигуратор
+     */
+    startGame () {
+        let btnPlay = document.getElementById('play');
+        let confPlayersNumber = 0;
+        btnPlay.addEventListener('click', () => {
+            if (!this.saveNumberPlayers()) return;
             btnPlay.setAttribute('data-hidden', true);
-            if (index === 0) {
-                var player = me.createPlayer('user');
-                player.show();
-                var configurator = new Configurator();
+            if (confPlayersNumber < this.userNumber) {
+                let user = this.createPlayer('user');
+                user.show();
+                document.getElementById('text_btm').innerHTML = `Конфигурация игрока ${user.fullName}`;
+                let configurator = new Configurator();
                 configurator.generateConfiguratorMarkup();
-                configurator.startConfigure(player);
+                configurator.startConfigure(user);
             } else {
-                me.startBattle();
+                this.startBattle();
             }
-            index++;
+            confPlayersNumber++;
         });
     }
 
+    /**
+     * Метод создает компьютеров, инициализирует контроллер боя и запускает бой
+     */
     startBattle () {
-        document.getElementById('instruction').remove();
         // показываем поле компьютера, создаём объект поля компьютера и расставляем корабли
-        var computer = this.createPlayer('computer');
-        computer.randomLocationShips();
-        computer.show();
-        var computer2 = this.createPlayer('computer');
-        computer2.randomLocationShips();
-        computer2.show();
-        document.getElementById('play').setAttribute('data-hidden', true);
+        for (let i = 0; i < this.computerNumber; i++) {
+            let computer = this.createPlayer('computer');
+            computer.randomLocationShips();
+        }
 
-        // удаляем события с поля игрока (отмена редактирования расстановки кораблей)
-        // userfield.removeEventListener('mousedown', user.onMouseDown);
-        // userfield.addEventListener('contextmenu', function(e) {
-        //     e.preventDefault();
-        //     e.stopPropagation();
-        //     return false;
-        // });
+        for (let player of this.players) {
+            player.show();
+            // player.hideShips();
+        }
 
         // Запуск модуля игры
+        document.getElementById('play').setAttribute('data-hidden', true);
         var controller = new BattleController(this.players);
         controller.startBattle();
     }
 
+    /**
+     * Метод создания игрока.
+     * По переданному типу создает либо пользователя, либо компьютера.
+     * @param  {String}
+     * @return {Field}
+     */
     createPlayer (type) {
-        var id = this.players.length + 1;
-        var fieldElement = document.createElement('div');
+        let id = this.players.length + 1;
+        let fieldElement = document.createElement('div');
         fieldElement.classList.add('field');
         fieldElement.setAttribute('data-hidden', true);
-        var shipsElement = document.createElement('div');
+        let shipsElement = document.createElement('div');
         shipsElement.classList.add('ships');
         shipsElement.setAttribute('id', 'player' + id);
         fieldElement.appendChild(shipsElement);
-        var field;
+        let field;
         switch (type) {
             case 'computer':
                 field = new Computer(fieldElement);
@@ -87,6 +128,10 @@ export default class Game {
                 field = new Field(fieldElement);
         }
         field.index = id;
+        let fieldName = document.createElement('span');
+        fieldName.classList.add('fieldName');
+        fieldName.innerHTML = field.fullName;
+        fieldElement.appendChild(fieldName);
         this.players.push(field);
         document.getElementById('main').appendChild(fieldElement);
         return field;

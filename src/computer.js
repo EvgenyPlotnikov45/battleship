@@ -10,9 +10,6 @@ export default class Computer extends Field {
         this.name = 'Компьютер';
         // массив с координатами выстрелов при рандомном выборе
         this.shootMatrix = [];
-        // массив с координатами более приоритетными, чем просто рандом
-        // в данном массиве хранятся диагональные координаты поля
-        this.orderedShootMatrix = [];
         // массив с координатами вокруг клетки с попаданием
         this.needShootMatrix = [];
         // объекты для хранения первого и след. выстрела
@@ -26,7 +23,6 @@ export default class Computer extends Field {
      */
     actualizeMatrixData (coords) {
         this.deleteElementMatrix(this.shootMatrix, coords);
-        this.deleteElementMatrix(this.orderedShootMatrix, coords);
         this.deleteElementMatrix(this.needShootMatrix, coords);
     }
 
@@ -44,7 +40,7 @@ export default class Computer extends Field {
                 return player.active && player !== this;
             });
 
-            var randomIndex = Utils.getRandom(filteredPlayers.length - 1);
+            let randomIndex = Utils.getRandom(filteredPlayers.length - 1);
             this.enemy = filteredPlayers[randomIndex];
             this.createShootMatrix();
         }
@@ -59,20 +55,11 @@ export default class Computer extends Field {
         let min = 0;
         let max = 10;
         this.shootMatrix = [];
-        this.orderedShootMatrix = [];
         this.needShootMatrix = [];
         for (let i = min; i < max; i++) {
             for(let j = min; j < max; j++) {
                 this.shootMatrix.push([i, j]);
             }
-        }
-
-        for (let i = min; i < max; i++) {
-            this.orderedShootMatrix.push([i, i]);
-        }
-
-        for (let i = min; i < max; i++) {
-            this.orderedShootMatrix.push([max - i - 1, i]);
         }
     }
 
@@ -104,26 +91,19 @@ export default class Computer extends Field {
 
         // удаляем координаты по которым произошел выстрел
         this.deleteElementMatrix(this.shootMatrix, coords);
-        this.deleteElementMatrix(this.orderedShootMatrix, coords);
 
         return coords;
     }
 
     /**
      * Метод определяет и возвращает координаты для обстрела.
-     * Приоритетнее берутся координаты из матрицы orderedShootMatrix.
      * @return {Object}
      */
     getCoordinatesShot () {
         let rnd, val, coords;
 
-        if (this.orderedShootMatrix.length != 0) {
-            rnd = Utils.getRandom(this.orderedShootMatrix.length - 1);
-            val = this.orderedShootMatrix.splice(rnd, 1)[0];
-        } else {
-            rnd = Utils.getRandom(this.shootMatrix.length - 1),
-            val = this.shootMatrix.splice(rnd, 1)[0];
-        }
+        rnd = Utils.getRandom(this.shootMatrix.length - 1),
+        val = this.shootMatrix.splice(rnd, 1)[0];
 
         coords = {
             x: val[0],
@@ -159,9 +139,6 @@ export default class Computer extends Field {
             if (enemy.matrix[x][y] != 0 && enemy.matrix[x][y] != 1) {
                 this.needShootMatrix.splice(i,1);
                 this.deleteElementMatrix(this.shootMatrix, coords);
-                if (this.orderedShootMatrix.length != 0) {
-                    this.deleteElementMatrix(this.orderedShootMatrix, coords);
-                }
             }
         }
     }
@@ -199,7 +176,6 @@ export default class Computer extends Field {
             // удаляем из массивов выстрелов ненужные координаты
             this.deleteElementMatrix(this.shootMatrix, obj);
             this.deleteElementMatrix(this.needShootMatrix, obj);
-            this.deleteElementMatrix(this.orderedShootMatrix, obj);
         }
     }
 
