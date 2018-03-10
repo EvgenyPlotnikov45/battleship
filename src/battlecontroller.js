@@ -5,15 +5,22 @@ import User from 'user';
 import Computer from 'computer';
 
 export default class BattleController {
+
     constructor (players) {
         this.index = 0;
         this.players = players;
+        this.player = null;
+        this.enemy = null;
+        this.coords = null;
         console.log(this.players)
     }
 
+    /**
+     * Рандомно перемешиваем массив с игроками, для определения первого хода.
+     * И зпускаем первый ход.
+     */
     startBattle () {
-        //TODO нужно рандомно отсортировать массив players
-        let players = this.players;
+        this.players.sort(() => Math.random() - 0.5);
         this.nextStep();
     }
 
@@ -141,6 +148,8 @@ export default class BattleController {
     alreadyHitting () {
         if (this.player instanceof User) {
             this.showText('По этим координатам уже стреляли.');
+        } else {
+            
         }
     }
 
