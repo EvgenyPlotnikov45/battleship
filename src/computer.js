@@ -6,22 +6,61 @@ import Field from 'field';
 export default class Computer extends Field {
     constructor (element) {
         super(...arguments);
+        this.enemy = null;
         this.name = 'Компьютер';
         // массив с координатами выстрелов при рандомном выборе
         this.shootMatrix = [];
-        // массив с координатами выстрелов для AI
+        // массив с координатами более приоритетными, чем просто рандом
+        // в данном массиве хранятся диагональные координаты поля
         this.orderedShootMatrix = [];
         // массив с координатами вокруг клетки с попаданием
         this.needShootMatrix = [];
         // объекты для хранения первого и след. выстрела
         this.firstHit = {};
         this.lastHit = {};
-        this.createShootMatrix();
     }
- 
+
+    /**
+     * Актуализируем информацию по переданным координатам, очищая матрицы.
+     * @param  {Object}
+     */
+    actualizeMatrixData (coords) {
+        this.deleteElementMatrix(this.shootMatrix, coords);
+        this.deleteElementMatrix(this.orderedShootMatrix, coords);
+        this.deleteElementMatrix(this.needShootMatrix, coords);
+    }
+
+    /**
+     * Компьютер должен выбрать себе цель для обстрела, поэтому
+     * он рандомно выбирает цель из массива игроков актуальных игроков
+     * и сохраняет её у себя. Компьютер будет стрелять по выбранной цели, пока
+     * она активна, а дальше выберет себе новую цель.
+     * @param  {Array} players
+     * @return {Field}
+     */
+    getEnemy (players) {
+        if (!this.enemy || (this.enemy && !this.enemy.active)) {
+            let filteredPlayers = players.filter((player) => {
+                return player.active && player !== this;
+            });
+
+            var randomIndex = Utils.getRandom(filteredPlayers.length - 1);
+            this.enemy = filteredPlayers[randomIndex];
+            this.createShootMatrix();
+        }
+
+        return this.enemy;
+    }
+
+    /**
+     * Очищаем и заполняем матрицы обстрела противника.
+     */
     createShootMatrix () {
         let min = 0;
         let max = 10;
+        this.shootMatrix = [];
+        this.orderedShootMatrix = [];
+        this.needShootMatrix = [];
         for (let i = min; i < max; i++) {
             for(let j = min; j < max; j++) {
                 this.shootMatrix.push([i, j]);
@@ -37,6 +76,10 @@ export default class Computer extends Field {
         }
     }
 
+    /**
+     * Метод возвращает более приоритетные координаты для обстрела
+     * @return {Object}
+     */
     getCoordinates () {
         let coords;
         if (this.needShootMatrix.length) {
@@ -48,6 +91,10 @@ export default class Computer extends Field {
         return coords;
     }
 
+    /**
+     * Возвращаем координаты из матрицы обстрела вокруг подбитой клетки.
+     * @return {Object}
+     */
     needShoot () {
         let val = this.needShootMatrix.shift();
         let coords = {
@@ -57,22 +104,21 @@ export default class Computer extends Field {
 
         // удаляем координаты по которым произошел выстрел
         this.deleteElementMatrix(this.shootMatrix, coords);
-        if (this.orderedShootMatrix.length != 0) {
-            this.deleteElementMatrix(this.orderedShootMatrix, coords);
-        }
+        this.deleteElementMatrix(this.orderedShootMatrix, coords);
 
         return coords;
     }
 
+    /**
+     * Метод определяет и возвращает координаты для обстрела.
+     * Приоритетнее берутся координаты из матрицы orderedShootMatrix.
+     * @return {Object}
+     */
     getCoordinatesShot () {
         let rnd, val, coords;
 
         if (this.orderedShootMatrix.length != 0) {
-            if (this.orderedShootMatrix.length > 10) {
-                rnd = Utils.getRandom(9);
-            } else {
-                rnd = Utils.getRandom(this.orderedShootMatrix.length - 1);
-            }
+            rnd = Utils.getRandom(this.orderedShootMatrix.length - 1);
             val = this.orderedShootMatrix.splice(rnd, 1)[0];
         } else {
             rnd = Utils.getRandom(this.shootMatrix.length - 1),
@@ -129,7 +175,7 @@ export default class Computer extends Field {
             [coords.x + 1, coords.y + 1]
         ];
 
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < points.length; i++) {
             let flag = true;
             if (points[i][0] < 0 || points[i][0] > 9 || points[i][1] < 0 || points[i][1] > 9) continue; // за пределами игрового поля
 
@@ -148,21 +194,17 @@ export default class Computer extends Field {
                 y: points[i][1]
             }
             enemy.matrix[obj.x][obj.y] = 2;
+            Utils.showIcons(enemy, obj, 'dot');
 
             // удаляем из массивов выстрелов ненужные координаты
             this.deleteElementMatrix(this.shootMatrix, obj);
-            if (this.needShootMatrix.length != 0) {
-                this.deleteElementMatrix(this.needShootMatrix, obj);
-            }
-
-            if (this.orderedShootMatrix.length != 0) {
-                this.deleteElementMatrix(this.orderedShootMatrix, obj);
-            }
+            this.deleteElementMatrix(this.needShootMatrix, obj);
+            this.deleteElementMatrix(this.orderedShootMatrix, obj);
         }
     }
 
     deleteElementMatrix (array, obj) {
-        for (var i = array.length - 1; i >= 0; i--) {
+        for (let i = array.length - 1; i >= 0; i--) {
             if (array[i][0] == obj.x && array[i][1] == obj.y) {
                 array.splice(i, 1);
             }

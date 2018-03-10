@@ -24,6 +24,10 @@ export default class BattleController {
         this.nextStep();
     }
 
+    /**
+     * Метод определяет, какой игрок ходит случающим и запускает ход данного игрока.
+     * Так же выполняется проверка на окончание игры.
+     */
     nextStep () {
         if (this.player && this.player instanceof User) this.clearEvents();
         if (this.checkEndGame()) return;
@@ -37,7 +41,6 @@ export default class BattleController {
         }
 
         if (this.player instanceof Computer) {
-            this.enemy = this.players[0];
             setTimeout(() => this.shoot(), 500);
         } else {
             // устанавливаем обработчики событий для пользователя
@@ -110,10 +113,11 @@ export default class BattleController {
         // координаты поступают по клику в px и преобразуются в координаты матрицы (coords)
         if (e !== undefined) {
             if (e.which != 1) return false;
-            // получаем координаты выстрела
             this.enemy = this.getFieldByElement(e.currentTarget);
+            // получаем координаты выстрела
             this.coords = this.transformCoordinates(e.pageX, e.pageY);
         } else {
+            this.enemy = this.player.getEnemy(this.players);
             // генерируются матричные координаты выстрела компьютера
             this.coords = this.player.getCoordinates();
         }
@@ -129,6 +133,7 @@ export default class BattleController {
                 this.hitting();
                 break;
             // обстрелянная координата
+            case 2:
             case 3:
             case 4:
                 this.alreadyHitting();
@@ -136,28 +141,38 @@ export default class BattleController {
         }
     }
 
+    /**
+     * Обработка случая с промахом.
+     */
     missing () {
         // устанавливаем иконку промаха и записываем промах в матрицу
-        this.showIcons(this.enemy, this.coords, 'dot');
+        Utils.showIcons(this.enemy, this.coords, 'dot');
         this.enemy.matrix[this.coords.x][this.coords.y] = 3;
 
         this.showText(`Игрок ${this.player.fullName} промахнулся.`);
         this.nextStep();
     }
 
+    /**
+     * Обработка случая, когда по данной клетке уже стреляли.
+     */
     alreadyHitting () {
         if (this.player instanceof User) {
             this.showText('По этим координатам уже стреляли.');
         } else {
-            
+            this.player.actualizeMatrixData(this.coords);
+            this.shoot();
         }
     }
 
+    /**
+     * Обработка попадания по кораблю.
+     */
     hitting () {
         this.enemy.matrix[this.coords.x][this.coords.y] = 4;
-        this.showIcons(this.enemy, this.coords, 'red-cross');
+        Utils.showIcons(this.enemy, this.coords, 'red-cross');
 
-        // вносим изменения в массив эскадры
+        // вносим изменения в массив кораблей
         // необходимо найти корабль, в который попали
         let ship = this.enemy.getShipByCoord(this.coords);
         ship.hits++;
@@ -184,6 +199,12 @@ export default class BattleController {
         }
     }
 
+    /**
+     * Трансформирование координат страницы в координаты поля противника
+     * @param  {Number} pageX
+     * @param  {Number} pageY
+     * @return {Object}
+     */
     transformCoordinates (pageX, pageY) {
         var obj = {};
         obj.x = Math.trunc((pageY - this.enemy.elementX) / this.enemy.shipSize),
@@ -191,19 +212,11 @@ export default class BattleController {
         return obj;
     }
 
-    showIcons (enemy, coords, iconClass) {
-        var iconField = document.createElement('div');
-        var sumbol = document.createElement('div');
-        iconField.className = 'icon-field';
-        sumbol.className = iconClass;
-        iconField.style.cssText = 'left:' + (coords.y * this.enemy.shipSize) + 'px; top:' + (coords.x * this.enemy.shipSize) + 'px;';
-        iconField.appendChild(sumbol);
-        this.enemy.element.appendChild(iconField);
-    }
-
+    /**
+     * Отображение текста внизу экрана.
+     * @param  {String}
+     */
     showText (text) {
-        var srvText = document.getElementById('text_btm');
-        srvText.innerHTML = '';
-        srvText.innerHTML = text;
+        document.getElementById('text_btm').innerHTML = text;
     }
 };

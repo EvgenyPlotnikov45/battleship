@@ -20,8 +20,25 @@ export default class Utils {
     static getCoords (el) {
         var coords = el.getBoundingClientRect();
         return {
-            top: coords.top + pageYOffset,
-            left: coords.left + pageXOffset
+            top: coords.top + window.pageYOffset,
+            left: coords.left + window.pageXOffset
         };
+    }
+
+    /**
+     * Создаем клетку с иконкой и добавляем её на переданное поле.
+     * Иконка может быть с попаданием, или с промахом.
+     * @param  {Field} enemy
+     * @param  {Object} coords
+     * @param  {String} iconClass
+     */
+    static showIcons (targetField, coords, iconClass) {
+        var iconField = document.createElement('div');
+        var sumbol = document.createElement('div');
+        iconField.className = 'icon-field';
+        sumbol.className = iconClass;
+        iconField.style.cssText = 'left:' + (coords.y * targetField.shipSize) + 'px; top:' + (coords.x * targetField.shipSize) + 'px;';
+        iconField.appendChild(sumbol);
+        targetField.element.appendChild(iconField);
     }
 };

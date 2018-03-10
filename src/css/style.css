@@ -39,6 +39,8 @@ p {margin-bottom: 10px;}
     position: relative;
     display: inline-block;
     margin-left: 90px;
+    background-image: url('../images/1.png');
+    background-size: 30px;
 }
 
 .ships {

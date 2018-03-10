@@ -48,6 +48,9 @@ export default class Game {
         var computer = this.createPlayer('computer');
         computer.randomLocationShips();
         computer.show();
+        var computer2 = this.createPlayer('computer');
+        computer2.randomLocationShips();
+        computer2.show();
         document.getElementById('play').setAttribute('data-hidden', true);
 
         // удаляем события с поля игрока (отмена редактирования расстановки кораблей)
@@ -82,7 +85,6 @@ export default class Game {
                 break;
             default:
                 field = new Field(fieldElement);
-
         }
         field.index = id;
         this.players.push(field);
