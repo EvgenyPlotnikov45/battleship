@@ -12,7 +12,6 @@ export default class BattleController {
         this.player = null;
         this.enemy = null;
         this.coords = null;
-        console.log(this.players)
     }
 
     /**
@@ -41,7 +40,7 @@ export default class BattleController {
         }
 
         if (this.player instanceof Computer) {
-            setTimeout(() => this.shoot(), 500);
+            setTimeout(() => this.shoot(), 100);
         } else {
             // устанавливаем обработчики событий для пользователя
             this.listenEvents();
@@ -114,25 +113,25 @@ export default class BattleController {
         if (e !== undefined) {
             if (e.which != 1) return false;
             this.enemy = this.getFieldByElement(e.currentTarget);
-            // получаем координаты выстрела
             this.coords = this.transformCoordinates(e.pageX, e.pageY);
         } else {
             this.enemy = this.player.getEnemy(this.players);
-            // генерируются матричные координаты выстрела компьютера
             this.coords = this.player.getCoordinates();
         }
 
-        var matrixValue = this.enemy.matrix[this.coords.x][this.coords.y];
+        if (!this.enemy) {
+            setTimeout(() => this.nextStep());
+            return;
+        }
+
+        let matrixValue = this.enemy.matrix[this.coords.x][this.coords.y];
         switch(matrixValue) {
-            // промах
             case 0:
                 this.missing();
                 break;
-            // попадание
             case 1:
                 this.hitting();
                 break;
-            // обстрелянная координата
             case 2:
             case 3:
             case 4:
@@ -143,6 +142,7 @@ export default class BattleController {
 
     /**
      * Обработка случая с промахом.
+     * Помечаем координаты матрицы промахом и передаем ход другому игроку.
      */
     missing () {
         // устанавливаем иконку промаха и записываем промах в матрицу
@@ -155,6 +155,9 @@ export default class BattleController {
 
     /**
      * Обработка случая, когда по данной клетке уже стреляли.
+     * Если стрелял компьютер, то нужно актуализировать его данные в матрицах
+     * и выстрелить снова. Такое случается, когда компьютер стреляет по цели с кем-то,
+     * либо он перешел на новую цель.
      */
     alreadyHitting () {
         if (this.player instanceof User) {
@@ -167,23 +170,19 @@ export default class BattleController {
 
     /**
      * Обработка попадания по кораблю.
+     * Фиксируем, что корабль поврежден, либо уничтожен.
+     * Проверяем, не пора ли закончить игру.
      */
     hitting () {
         this.enemy.matrix[this.coords.x][this.coords.y] = 4;
         Utils.showIcons(this.enemy, this.coords, 'red-cross');
-
-        // вносим изменения в массив кораблей
-        // необходимо найти корабль, в который попали
         let ship = this.enemy.getShipByCoord(this.coords);
         ship.hits++;
-        // если кол-во попаданий в корабль становится равным кол-ву палуб
-        // считаем этот корабль уничтоженным и удаляем его
         if (ship.hits == ship.decks) {
             this.enemy.deleteShip(ship);
         }
 
         this.showText(`Игрок ${this.player.fullName} попал в игрока ${this.enemy.fullName}`);
-
         if (!this.enemy.hasShips()) {
             this.enemy.active = false;
             this.checkEndGame();
@@ -193,10 +192,11 @@ export default class BattleController {
                 this.player.markUnnecessaryCell(this.coords, this.enemy);
                 // обстрел клеток вокруг попадания
                 this.player.getNeedCoordinatesShot(this.coords, this.enemy);  
-                // производим новый выстрел
-                setTimeout(() => this.shoot(), 500);
             }
         }
+
+        // производим новый выстрел
+        if (this.player instanceof Computer) setTimeout(() => this.shoot(), 100);
     }
 
     /**

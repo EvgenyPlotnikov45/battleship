@@ -58,7 +58,8 @@ export default class Game {
 
     /**
      * Запускаем игру. Подписавшись на событие click кнопки play
-     * запускаем конфигуратор
+     * сначала конфигурируем всех пользователей, а после вызываем
+     * метод начала боя.
      */
     startGame () {
         let btnPlay = document.getElementById('play');

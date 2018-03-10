@@ -11,8 +11,11 @@ export default class Configurator {
         this.field = null;
     }
 
+    /**
+     * Генерация разметки конфигуратора
+     */
     generateConfiguratorMarkup() {
-        var mainContainer = document.getElementById('main');
+        let mainContainer = document.getElementById('main');
         mainContainer.insertAdjacentHTML('beforeEnd', '' +
         '<div id="instruction" class="instruction" data-hidden="false">' +
             '<div id="type_placement" class="type-placement-box">' +
@@ -27,6 +30,9 @@ export default class Configurator {
         '</div>');
     }
 
+    /**
+     * Генерация коллекции кораблей, на основе полученных данных от пользователя.
+     */
     generateShipCollection () {
         var shipsData = this.field.shipsData;
         var shipsContainer = document.getElementById('initial_ships');

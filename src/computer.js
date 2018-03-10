@@ -22,6 +22,7 @@ export default class Computer extends Field {
      * @param  {Object}
      */
     actualizeMatrixData (coords) {
+        console.log(coords);
         this.deleteElementMatrix(this.shootMatrix, coords);
         this.deleteElementMatrix(this.needShootMatrix, coords);
     }
@@ -35,12 +36,14 @@ export default class Computer extends Field {
      * @return {Field}
      */
     getEnemy (players) {
+        console.log(this.enemy);
         if (!this.enemy || (this.enemy && !this.enemy.active)) {
             let filteredPlayers = players.filter((player) => {
                 return player.active && player !== this;
             });
 
             let randomIndex = Utils.getRandom(filteredPlayers.length - 1);
+            console.log(filteredPlayers);
             this.enemy = filteredPlayers[randomIndex];
             this.createShootMatrix();
         }
