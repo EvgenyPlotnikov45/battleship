@@ -6,9 +6,9 @@ import Ship from 'ship';
 
 export default class Configurator {
 
-    constructor() {
+    constructor(field) {
         this.pressed = false;
-        this.field = null;
+        this.field = field;
     }
 
     /**
@@ -52,8 +52,11 @@ export default class Configurator {
         }
     }
 
+    /**
+     * Подписываемся на кнопки выбора типа расстановки кораблей.
+     * @param  {Field}
+     */
     startConfigure(field) {
-        this.field = field;
         var typePlacement = document.getElementById('type_placement');
         typePlacement.addEventListener('click', this.onTypePlacementClick.bind(this));
     }

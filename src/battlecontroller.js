@@ -8,6 +8,7 @@ export default class BattleController {
 
     constructor (players) {
         this.index = 0;
+        this.timeout = 500;
         this.players = players;
         this.player = null;
         this.enemy = null;
@@ -40,7 +41,7 @@ export default class BattleController {
         }
 
         if (this.player instanceof Computer) {
-            setTimeout(() => this.shoot(), 100);
+            setTimeout(() => this.shoot(), this.timeout);
         } else {
             // устанавливаем обработчики событий для пользователя
             this.listenEvents();
@@ -64,7 +65,14 @@ export default class BattleController {
             return false;
         } else {
             this.showText(`Игрок ${this.player.fullName} победил.`);
+            this.showShips();
             return true;
+        }
+    }
+
+    showShips () {
+        for(let player of this.players) {
+            player.showShips();
         }
     }
 
@@ -120,6 +128,7 @@ export default class BattleController {
         }
 
         if (!this.enemy) {
+            // вызываем через setTimeout, чтобы сбросить стек вызовов
             setTimeout(() => this.nextStep());
             return;
         }
@@ -189,14 +198,14 @@ export default class BattleController {
         } else {
             if (this.player instanceof Computer) {
                 // отмечаем клетки, где точно не может стоять корабль
-                this.player.markUnnecessaryCell(this.coords, this.enemy);
+                this.player.checkUnnecessaryCell(this.coords);
                 // обстрел клеток вокруг попадания
-                this.player.getNeedCoordinatesShot(this.coords, this.enemy);  
+                this.player.setNeedCoordinatesShot(this.coords);  
             }
         }
 
         // производим новый выстрел
-        if (this.player instanceof Computer) setTimeout(() => this.shoot(), 100);
+        if (this.player instanceof Computer) setTimeout(() => this.shoot(), this.timeout);
     }
 
     /**
@@ -206,10 +215,10 @@ export default class BattleController {
      * @return {Object}
      */
     transformCoordinates (pageX, pageY) {
-        var obj = {};
-        obj.x = Math.trunc((pageY - this.enemy.elementX) / this.enemy.shipSize),
-        obj.y = Math.trunc((pageX - this.enemy.elementY) / this.enemy.shipSize);
-        return obj;
+        return {
+            x: Math.trunc((pageY - this.enemy.elementX) / this.enemy.shipSize),
+            y: Math.trunc((pageX - this.enemy.elementY) / this.enemy.shipSize)
+        };
     }
 
     /**

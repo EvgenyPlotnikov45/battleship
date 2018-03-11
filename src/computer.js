@@ -22,7 +22,6 @@ export default class Computer extends Field {
      * @param  {Object}
      */
     actualizeMatrixData (coords) {
-        console.log(coords);
         this.deleteElementMatrix(this.shootMatrix, coords);
         this.deleteElementMatrix(this.needShootMatrix, coords);
     }
@@ -36,7 +35,6 @@ export default class Computer extends Field {
      * @return {Field}
      */
     getEnemy (players) {
-        console.log(this.enemy);
         if (!this.enemy || (this.enemy && !this.enemy.active)) {
             let filteredPlayers = players.filter((player) => {
                 return player.active && player !== this;
@@ -103,12 +101,9 @@ export default class Computer extends Field {
      * @return {Object}
      */
     getCoordinatesShot () {
-        let rnd, val, coords;
-
-        rnd = Utils.getRandom(this.shootMatrix.length - 1),
-        val = this.shootMatrix.splice(rnd, 1)[0];
-
-        coords = {
+        let rnd = Utils.getRandom(this.shootMatrix.length - 1);
+        let val = this.shootMatrix.splice(rnd, 1)[0];
+        let coords = {
             x: val[0],
             y: val[1]
         };
@@ -117,8 +112,14 @@ export default class Computer extends Field {
         return coords;
     }
 
-    getNeedCoordinatesShot (coords, enemy) {
-        var kx = 0, ky = 0;
+    /**
+     * Проверка и установка координат, которые нужно будет обстрелять, так как там
+     * потенциально может быть корабль
+     * @param {Object}
+     * @param {Field}
+     */
+    setNeedCoordinatesShot (coords) {
+        let kx = 0, ky = 0;
 
         if (Object.keys(this.firstHit).length === 0) {
             this.firstHit = coords;
@@ -139,42 +140,49 @@ export default class Computer extends Field {
             let x = this.needShootMatrix[i][0];
             let y = this.needShootMatrix[i][1];
             //удаляем точки, по которым уже проводился обстрел или стрельба не имеет смысла
-            if (enemy.matrix[x][y] != 0 && enemy.matrix[x][y] != 1) {
+            if (this.enemy.matrix[x][y] != 0 && this.enemy.matrix[x][y] != 1) {
                 this.needShootMatrix.splice(i,1);
                 this.deleteElementMatrix(this.shootMatrix, coords);
             }
         }
     }
 
-    markUnnecessaryCell (coords, enemy) {
-        let icons = enemy.element.querySelectorAll('.icon-field');
+    /**
+     * Метод проверяет точки, находящиеся подиагонали от переданных координат.
+     * Данные точки помечаются как обстреляные и удаляются из матриц обстрела.
+     * @param  {Object}
+     * @return {[type]}
+     */
+    checkUnnecessaryCell (coords) {
+        let icons = this.enemy.element.querySelectorAll('.icon-field');
         let points = [
-            [coords.x - 1, coords.y - 1],
-            [coords.x - 1, coords.y + 1],
-            [coords.x + 1, coords.y - 1],
-            [coords.x + 1, coords.y + 1]
+            {x: coords.x - 1, y: coords.y - 1},
+            {x: coords.x - 1, y: coords.y + 1},
+            {x: coords.x + 1, y: coords.y - 1},
+            {x: coords.x + 1, y: coords.y + 1}
         ];
 
-        for (let i = 0; i < points.length; i++) {
+        for (let point of points) {
             let flag = true;
-            if (points[i][0] < 0 || points[i][0] > 9 || points[i][1] < 0 || points[i][1] > 9) continue; // за пределами игрового поля
+            if (point.x < 0 || point.x > 9 || point.y < 0 || point.y > 9) continue; // за пределами игрового поля
 
-            for (let j = 0; j < icons.length; j++) {
-                var x = icons[j].style.top.slice(0, -2) / enemy.shipSize,
-                    y = icons[j].style.left.slice(0, -2) / enemy.shipSize;
-                if (points[i][0] == x && points[i][1] == y) {
+            for (let icon of icons) {
+                let x = icon.style.top.slice(0, -2) / this.enemy.shipSize;
+                let y = icon.style.left.slice(0, -2) / this.enemy.shipSize;
+                if (point.x == x && point.y == y) {
                     flag = false;
                     break;
                 }
             }
+
             if (flag === false) continue;
 
             let obj = {
-                x: points[i][0],
-                y: points[i][1]
+                x: point.x,
+                y: point.y
             }
-            enemy.matrix[obj.x][obj.y] = 2;
-            Utils.showIcons(enemy, obj, 'dot');
+            this.enemy.matrix[obj.x][obj.y] = 2;
+            Utils.showIcons(this.enemy, obj, 'dot');
 
             // удаляем из массивов выстрелов ненужные координаты
             this.deleteElementMatrix(this.shootMatrix, obj);
@@ -182,10 +190,16 @@ export default class Computer extends Field {
         }
     }
 
-    deleteElementMatrix (array, obj) {
+    /**
+     * Метод удаляет из массива переданные координаты
+     * @param  {Array}
+     * @param  {Object}
+     */
+    deleteElementMatrix (array, coord) {
         for (let i = array.length - 1; i >= 0; i--) {
-            if (array[i][0] == obj.x && array[i][1] == obj.y) {
+            if (array[i][0] == coord.x && array[i][1] == coord.y) {
                 array.splice(i, 1);
+                break;
             }
         }
     }

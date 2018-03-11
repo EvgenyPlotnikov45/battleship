@@ -71,9 +71,9 @@ export default class Game {
                 let user = this.createPlayer('user');
                 user.show();
                 document.getElementById('text_btm').innerHTML = `Конфигурация игрока ${user.fullName}`;
-                let configurator = new Configurator();
+                let configurator = new Configurator(user);
                 configurator.generateConfiguratorMarkup();
-                configurator.startConfigure(user);
+                configurator.startConfigure();
             } else {
                 this.startBattle();
             }
@@ -93,7 +93,7 @@ export default class Game {
 
         for (let player of this.players) {
             player.show();
-            // player.hideShips();
+            player.hideShips();
         }
 
         // Запуск модуля игры

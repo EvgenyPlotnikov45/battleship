@@ -51,6 +51,9 @@ export default class Field {
         this.wrapper.setAttribute('data-hidden', true);
     }
 
+    /**
+     * Случайное распределение кораблей на поле.
+     */
     randomLocationShips () {
         this.matrix = Utils.createMatrix();
         var data = this.shipsData;
@@ -69,9 +72,13 @@ export default class Field {
         }
     }
 
+    /**
+     * @param  {Number}
+     * @return {Object}
+     */
     getCoordinatesDecks (decks) {
         // kx == 1 - вертикально, ky == 1 - горизонтально
-        var kx = Utils.getRandom(1),
+        let kx = Utils.getRandom(1),
             ky = (kx == 0) ? 1 : 0,
             x, y;
 
@@ -84,20 +91,23 @@ export default class Field {
         }
 
         // валидация палуб корабля
-        var result = this.checkLocationShip(x, y, kx, ky, decks);
+        let result = this.checkLocationShip(x, y, kx, ky, decks);
         if (!result) return this.getCoordinatesDecks(decks);
 
-        var obj = {
-            x: x,
-            y: y,
-            kx: kx,
-            ky: ky
-        };
-        return obj;
+        return {x, y, kx, ky};
     }
 
+    /**
+     * Проверка возможности нахождения корабля в переданных координатах.
+     * @param  {Number} x
+     * @param  {Number} y
+     * @param  {Number} kx
+     * @param  {Number} ky
+     * @param  {Number} decks
+     * @return {Boolean}
+     */
     checkLocationShip (x, y, kx, ky, decks) {
-        var fromX, toX, fromY, toY;
+        let fromX, toX, fromY, toY;
 
         fromX = (x == 0) ? x : x - 1;
         if (x + kx * decks == 10 && kx == 1) toX = x + kx * decks;
@@ -116,39 +126,50 @@ export default class Field {
         // fromX и from, всегда валидны
         if (toX === undefined || toY === undefined) return false;
 
-        for (var i = fromX; i < toX; i++) {
-            for (var j = fromY; j < toY; j++) {
+        for (let i = fromX; i < toX; i++) {
+            for (let j = fromY; j < toY; j++) {
                 if (this.matrix[i][j] == 1) return false;
             }
         }
         return true;
     }
 
+    /**
+     * Создаем пустую матрицу
+     */
     resetMatrix () {
         this.matrix = Utils.createMatrix();
     }
 
+    /**
+     * Очищаем все корабли с поля и удаляем их.
+     */
     cleanField () {
-        var parent  = this.element,
-            id      = parent.getAttribute('id'),
-            divs    = document.querySelectorAll('#' + id + ' > div');
+        let element = this.element;
+        let divs = element.querySelectorAll('div.ship');
 
-        [].forEach.call(divs, function(el) {
+        for (let el of divs) {
             parent.removeChild(el);
-        });
+        }
         // очищаем массив объектов кораблей
         this.squadron.length = 0;
     }
 
+    /**
+     * Скрываем все корабли на поле, но при этом не удаляем их, а сохраняем
+     * в отдельный массив для возможного дальнейшего отображения.
+     */
     hideShips () {
         let element = this.element;
-        let hiddenShips = this.hiddenShips;
         let ships = element.querySelectorAll('div.ship');
         for (let ship of ships) {
-            hiddenShips.push(element.removeChild(ship));
+            this.hiddenShips.push(element.removeChild(ship));
         }
     }
 
+    /**
+     * Отображаем скрытые корабли на поле
+     */
     showShips () {
         var element = this.element;
         var hiddenShips = this.hiddenShips;
@@ -158,18 +179,25 @@ export default class Field {
         hiddenShips = [];
     }
 
+    /**
+     * Метод возвращает корабль, который находится по переданным координатам
+     * @param  {Object}
+     * @return {Ship}
+     */
     getShipByCoord (coords) {
-        let arrayDescks;
-        for (let i = this.squadron.length - 1; i >= 0; i--) {
-            arrayDescks = this.squadron[i].matrix; // массив с координатами палуб корабля
-            for (let j = 0; j < arrayDescks.length; j++) {
-                if (arrayDescks[j][0] == coords.x && arrayDescks[j][1] == coords.y) {
-                    return this.squadron[i];
+        for (let ship of this.squadron) {
+            for (let matrix of ship.matrix) {
+                if (matrix[0] == coords.x && matrix[1] == coords.y) {
+                    return ship;
                 }
             }
         }
     }
 
+    /**
+     * Удаление корабля
+     * @param  {Ship}
+     */
     deleteShip (ship) {
         for (let i = 0; i < this.squadron.length; i++) {
             if (this.squadron[i] === ship) {
@@ -179,6 +207,10 @@ export default class Field {
         }
     }
 
+    /**
+     * Проверка, остались ли еще живые корабли на поле
+     * @return {Boolean}
+     */
     hasShips () {
         return !!this.squadron.length;
     }
