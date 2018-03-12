@@ -41,7 +41,6 @@ export default class Computer extends Field {
             });
 
             let randomIndex = Utils.getRandom(filteredPlayers.length - 1);
-            console.log(filteredPlayers);
             this.enemy = filteredPlayers[randomIndex];
             this.createShootMatrix();
         }

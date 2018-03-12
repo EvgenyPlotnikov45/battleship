@@ -17,10 +17,10 @@ export default class Ship {
     }
 
     createShip () {
-        var k = 0;
+        let k = 0;
         while (k < this.decks) {
-            var x = this.x0 + k * this.kx;
-            var y = this.y0 + k * this.ky;
+            let x = this.x0 + k * this.kx;
+            let y = this.y0 + k * this.ky;
             // записываем координаты корабля в матрицу игрового поля
             this.field.matrix[x][y] = 1;
             // записываем координаты корабля в матрицу экземпляра корабля
@@ -37,13 +37,13 @@ export default class Ship {
     }
 
     showShip () {
-        var div = document.createElement('div'),
+        let div = document.createElement('div'),
             dir = (this.kx == 1) ? ' vertical' : '',
             classname = this.name.slice(0, -1),
             field = this.field;
 
-        var left = this.y0 * this.field.shipSize;
-        var top = this.x0 * this.field.shipSize;
+        let left = this.y0 * this.field.shipSize;
+        let top = this.x0 * this.field.shipSize;
         div.setAttribute('id', this.name);
         div.className = 'ship ' + classname + dir;
         div.style.cssText = 'left:' + left + 'px; top:' + top + 'px;';

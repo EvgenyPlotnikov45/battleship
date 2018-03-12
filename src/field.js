@@ -56,17 +56,17 @@ export default class Field {
      */
     randomLocationShips () {
         this.matrix = Utils.createMatrix();
-        var data = this.shipsData;
-        for (var i = 0; i < data.length; i++) {
-            var decks = data[i].size; // кол-во палуб
-            var amount = data[i].amount; // кол-во кораблей
-            for (var j = 0; j < amount; j++) {
+        let data = this.shipsData;
+        for (let i = 0; i < data.length; i++) {
+            let decks = data[i].size; // кол-во палуб
+            let amount = data[i].amount; // кол-во кораблей
+            for (let j = 0; j < amount; j++) {
                 // получаем координаты первой палубы и направление расположения палуб (корабля)
-                var fc = this.getCoordinatesDecks(decks);
+                let fc = this.getCoordinatesDecks(decks);
                 fc.decks = decks;
                 fc.shipname = data[i].type + String(j + 1);
                 // создаём экземпляр корабля и выводим на экран
-                var ship = new Ship(this, fc);
+                let ship = new Ship(this, fc);
                 ship.createShip();
             }
         }
@@ -171,8 +171,8 @@ export default class Field {
      * Отображаем скрытые корабли на поле
      */
     showShips () {
-        var element = this.element;
-        var hiddenShips = this.hiddenShips;
+        let element = this.element;
+        let hiddenShips = this.hiddenShips;
         for (let ship of hiddenShips) {
             element.appendChild(ship);
         }

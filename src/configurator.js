@@ -15,33 +15,25 @@ export default class Configurator {
      * Генерация разметки конфигуратора
      */
     generateConfiguratorMarkup() {
+        let tpl = require('./templates/configurator.tpl');
+        let templater = require('lodash.template');
+        let compile = templater(tpl);
         let mainContainer = document.getElementById('main');
-        mainContainer.insertAdjacentHTML('beforeEnd', '' +
-        '<div id="instruction" class="instruction" data-hidden="false">' +
-            '<div id="type_placement" class="type-placement-box">' +
-                '<span class="link" data-target="random">Расставить автоматически</span><br>' +
-                '<span class="link" data-target="manually">Ручная расстановка</span>' +
-            '</div>' +
-            '<div id="ships_collection" class="ships-collection" data-hidden="true">' +
-                '<p>Перетащите корабли на поле.<br>ПКМ - поворот корабля.</p>' +
-                '<ul id="initial_ships" class="initial-ships">' +
-                '</ul>' +
-            '</div>' +
-        '</div>');
+        mainContainer.insertAdjacentHTML('beforeEnd', compile());
     }
 
     /**
      * Генерация коллекции кораблей, на основе полученных данных от пользователя.
      */
     generateShipCollection () {
-        var shipsData = this.field.shipsData;
-        var shipsContainer = document.getElementById('initial_ships');
+        let shipsData = this.field.shipsData;
+        let shipsContainer = document.getElementById('initial_ships');
         shipsContainer.innerHTML = '';
-        for (var i = 0; i < shipsData.length; i++) {
-            var shipConfig = shipsData[i];
-            var li = document.createElement('li');
-            for (var j = 0; j < shipConfig.amount; j++) {
-                var shipElement = document.createElement('div');
+        for (let i = 0; i < shipsData.length; i++) {
+            let shipConfig = shipsData[i];
+            let li = document.createElement('li');
+            for (let j = 0; j < shipConfig.amount; j++) {
+                let shipElement = document.createElement('div');
                 shipElement.setAttribute('id', shipConfig.type + (j+1));
                 shipElement.classList.add('ship');
                 shipElement.classList.add(shipConfig.type);
@@ -57,7 +49,7 @@ export default class Configurator {
      * @param  {Field}
      */
     startConfigure(field) {
-        var typePlacement = document.getElementById('type_placement');
+        let typePlacement = document.getElementById('type_placement');
         typePlacement.addEventListener('click', this.onTypePlacementClick.bind(this));
     }
 
@@ -113,7 +105,7 @@ export default class Configurator {
     onMouseDown (e) {
         if (e.which != 1) return false;
 
-        var el = e.target.closest('.ship');
+        let el = e.target.closest('.ship');
         if (!el) return;
         this.pressed = true;
 
@@ -130,9 +122,9 @@ export default class Configurator {
         // нажатие мыши произошло по установленному кораблю, находящемуся
         // в игровом поле юзера (редактирование положения корабля)
         if (el.parentElement.getAttribute('id') == this.field.element.getAttribute('id')) {
-            var name = el.getAttribute('id');
+            let name = el.getAttribute('id');
             this.getDirectionShip(name);
-            var computedStyle   = getComputedStyle(el);
+            let computedStyle   = getComputedStyle(el);
             this.draggable.left = computedStyle.left.slice(0, -2);
             this.draggable.top  = computedStyle.top.slice(0, -2);
             this.cleanShip(el);
@@ -149,7 +141,7 @@ export default class Configurator {
             // если не удалось создать clone
             if (!this.clone) return;
             
-            var coords = Utils.getCoords(this.clone);
+            let coords = Utils.getCoords(this.clone);
             this.shiftX = this.draggable.downX - coords.left;
             this.shiftY = this.draggable.downY - coords.top;
 
@@ -157,9 +149,9 @@ export default class Configurator {
             this.decks = this.getDecksClone();
         }
 
-        var user = this.field;
+        let user = this.field;
         // координаты сторон аватара
-        var currLeft    = e.pageX - this.shiftX,
+        let currLeft    = e.pageX - this.shiftX,
             currTop     = e.pageY - this.shiftY,
             currBtm     = (this.draggable.kx == 0) ? currTop + user.shipSize : currTop + user.shipSize * this.decks,
             currRight   = (this.draggable.ky == 0) ? currLeft + user.shipSize : currLeft + user.shipSize * this.decks;
@@ -172,9 +164,9 @@ export default class Configurator {
             currTop >= user.elementX &&
             currBtm <= user.elementBtm) {
             // получаем координаты привязанные в сетке поля и в координатах матрицы
-            var coords = this.getCoordsClone(this.decks);
+            let coords = this.getCoordsClone(this.decks);
             // проверяем валидность установленных координат
-            var result = user.checkLocationShip(coords.x, coords.y, this.draggable.kx, this.draggable.ky, this.decks);
+            let result = user.checkLocationShip(coords.x, coords.y, this.draggable.kx, this.draggable.ky, this.decks);
 
             if (result) {
                 this.clone.classList.remove('unsuccess');
@@ -191,10 +183,10 @@ export default class Configurator {
     }
 
     onMouseUp (e) {
-        var user = this.field;
+        let user = this.field;
         this.pressed = false;
         if (this.clone) {
-            var dropElem = this.findDroppable(e);
+            let dropElem = this.findDroppable(e);
 
             // если корабль пытаются поставить в запретные координаты, то возвращаем
             // его в первоначальное место: или '#user_field' или '#initial_ships'
@@ -212,7 +204,7 @@ export default class Configurator {
 
             if (dropElem && dropElem == user.element || this.draggable.left !== undefined && this.draggable.top !== undefined) {
                 // получаем координаты привязанные в сетке поля и в координатах матрицы
-                var coords = this.getCoordsClone(this.decks);
+                let coords = this.getCoordsClone(this.decks);
 
                 user.element.appendChild(this.clone);
                 // this.x0 = coords.x;
@@ -221,7 +213,7 @@ export default class Configurator {
                 this.clone.style.top = coords.top + 'px';
 
                 // создаём экземпляр корабля
-                var shipConfig = {
+                let shipConfig = {
                         'shipname': this.clone.getAttribute('id'),
                         'x': coords.x,
                         'y': coords.y,
@@ -230,7 +222,7 @@ export default class Configurator {
                         'decks': this.decks
                     };
 
-                var ship = new Ship(user, shipConfig);
+                let ship = new Ship(user, shipConfig);
                 ship.createShip();
                 document.getElementById(ship.name).style.zIndex = null;
                 user.element.removeChild(this.clone);
@@ -246,7 +238,7 @@ export default class Configurator {
     }
 
     creatClone () {
-        var avatar = this.draggable.elem,
+        let avatar = this.draggable.elem,
             old = {
                 parent:         avatar.parentNode,
                 nextSibling:    avatar.nextSibling,
@@ -271,15 +263,15 @@ export default class Configurator {
 
     findDroppable (e) {
         this.clone.hidden = true;
-        var el = document.elementFromPoint(e.clientX, e.clientY);
+        let el = document.elementFromPoint(e.clientX, e.clientY);
         this.clone.hidden = false;
         return el.closest('.ships');
     }
 
     getDecksClone () {
-        var type = this.clone.getAttribute('id').slice(0, -1);
-        var data = this.field.shipsData;
-        for (var i = 0; i < data.length; i++) {
+        let type = this.clone.getAttribute('id').slice(0, -1);
+        let data = this.field.shipsData;
+        for (let i = 0; i < data.length; i++) {
             if (data[i].type === type) {
                 return data[i].size;
             }
@@ -287,7 +279,7 @@ export default class Configurator {
     }
 
     getCoordsClone (decks) {
-        var user = this.field,
+        let user = this.field,
             pos     = this.clone.getBoundingClientRect(),
             left    = pos.left - user.elementY,
             right   = pos.right - user.elementY,
@@ -315,14 +307,14 @@ export default class Configurator {
         e.preventDefault();
         e.stopPropagation();
 
-        var id = e.target.getAttribute('id');
+        let id = e.target.getAttribute('id');
 
-        var user = this.field;
+        let user = this.field;
         // ищем корабль, у которого имя совпадает с полученным id
-        for (var i = 0; i < user.squadron.length; i++) {
-            var data = user.squadron[i];
+        for (let i = 0; i < user.squadron.length; i++) {
+            let data = user.squadron[i];
             if (data.name == id && data.decks != 1) {
-                var kx  = (data.kx == 0) ? 1 : 0,
+                let kx  = (data.kx == 0) ? 1 : 0,
                     ky  = (data.ky == 0) ? 1 : 0;
 
                 // удаляем экземпляр корабля
@@ -330,13 +322,13 @@ export default class Configurator {
                 user.element.removeChild(e.target);
 
                 // проверяем валидность координат
-                var result = user.checkLocationShip(data.x0, data.y0, kx, ky, data.decks);
+                let result = user.checkLocationShip(data.x0, data.y0, kx, ky, data.decks);
                 if (result === false) {
-                    var kx  = (kx == 0) ? 1 : 0,
+                    let kx  = (kx == 0) ? 1 : 0,
                         ky  = (ky == 0) ? 1 : 0;
                 }
                 // создаём экземпляр корабля
-                var shipConfig = {
+                let shipConfig = {
                     'shipname': data.name,
                     'x': data.x0,
                     'y': data.y0,
@@ -345,10 +337,10 @@ export default class Configurator {
                     'decks': data.decks
                 };
 
-                var ship = new Ship(user, shipConfig);
+                let ship = new Ship(user, shipConfig);
                 ship.createShip();
                 if (!result) {
-                    var el = document.getElementById(ship.name);
+                    let el = document.getElementById(ship.name);
                     el.classList.add('unsuccess');
                     setTimeout(function() {
                         el.classList.remove('unsuccess');
@@ -363,14 +355,14 @@ export default class Configurator {
 
     cleanShip (el) {
         // получаем координаты в матрице
-        var coords = el.getBoundingClientRect(),
+        let coords = el.getBoundingClientRect(),
             user = this.field,
             x = Math.round((coords.top - user.elementX) / user.shipSize),
             y = Math.round((coords.left - user.elementY) / user.shipSize),
             data, k;
 
         // ищем корабль, которому принадлежат данные координаты
-        for (var i = 0; i < user.squadron.length; i++) {
+        for (let i = 0; i < user.squadron.length; i++) {
             data = user.squadron[i];
             if (data.x0 == x && data.y0 == y) {
                 // удаляем из матрицы координаты корабля
@@ -387,9 +379,9 @@ export default class Configurator {
     }
 
     getDirectionShip (shipname) {
-        var data;
-        var user = this.field;
-        for (var i = 0; i < user.squadron.length; i++) {
+        let data;
+        let user = this.field;
+        for (let i = 0; i < user.squadron.length; i++) {
             data = user.squadron[i];
             if (data.name === shipname) {
                 this.draggable.kx = data.kx;
