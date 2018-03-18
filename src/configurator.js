@@ -53,6 +53,10 @@ export default class Configurator {
         typePlacement.addEventListener('click', this.onTypePlacementClick.bind(this));
     }
 
+    /**
+     * Обработка нажатия на элемент выбора расстановки кораблей: "Автоматически" или "Ручная"
+     * @param  {Event}
+     */
     onTypePlacementClick (e) {
         let el = e.target;
         if (el.tagName != 'SPAN') return;
@@ -71,6 +75,9 @@ export default class Configurator {
         }
     }
 
+    /**
+     * Установки слушателей
+     */
     setObserver () {
         if (!this.hasObservers) {
             this.hasObservers = true;
@@ -102,6 +109,10 @@ export default class Configurator {
         this.field.hide();
     }
 
+    /**
+     * При нажатии на корабль, начинаем процес его перетаскивания
+     * @param  {Event}
+     */
     onMouseDown (e) {
         if (e.which != 1) return false;
 
@@ -111,12 +122,11 @@ export default class Configurator {
 
         // запоминаем переносимый объект и его свойства
         this.draggable = {
-            elem:   el,
-            //запоминаем координаты, с которых начат перенос
-            downX:  e.pageX,
-            downY:  e.pageY,
-            kx:     0,
-            ky:     1
+            elem: el,
+            downX: e.pageX,
+            downY: e.pageY,
+            kx: 0,
+            ky: 1
         };
 
         // нажатие мыши произошло по установленному кораблю, находящемуся
@@ -124,7 +134,7 @@ export default class Configurator {
         if (el.parentElement.getAttribute('id') == this.field.element.getAttribute('id')) {
             let name = el.getAttribute('id');
             this.getDirectionShip(name);
-            let computedStyle   = getComputedStyle(el);
+            let computedStyle = window.getComputedStyle(el);
             this.draggable.left = computedStyle.left.slice(0, -2);
             this.draggable.top  = computedStyle.top.slice(0, -2);
             this.cleanShip(el);
@@ -133,11 +143,15 @@ export default class Configurator {
         return false;
     }
 
+    /**
+     * Обработчик движения мышкой, синхронизируем координаты корабля держа его под курсором.
+     * @param  {Event}
+     */
     onMouseMove (e) {
         if (this.pressed == false || !this.draggable.elem) return;
 
         if (!this.clone) {
-            this.clone = this.creatClone(e);
+            this.clone = this.createClone(e);
             // если не удалось создать clone
             if (!this.clone) return;
             
@@ -151,10 +165,10 @@ export default class Configurator {
 
         let user = this.field;
         // координаты сторон аватара
-        let currLeft    = e.pageX - this.shiftX,
-            currTop     = e.pageY - this.shiftY,
-            currBtm     = (this.draggable.kx == 0) ? currTop + user.shipSize : currTop + user.shipSize * this.decks,
-            currRight   = (this.draggable.ky == 0) ? currLeft + user.shipSize : currLeft + user.shipSize * this.decks;
+        let currLeft = e.pageX - this.shiftX,
+            currTop = e.pageY - this.shiftY,
+            currBtm = (this.draggable.kx == 0) ? currTop + user.shipSize : currTop + user.shipSize * this.decks,
+            currRight = (this.draggable.ky == 0) ? currLeft + user.shipSize : currLeft + user.shipSize * this.decks;
 
         this.clone.style.left = currLeft + 'px';
         this.clone.style.top = currTop + 'px';
@@ -182,6 +196,10 @@ export default class Configurator {
         return false;
     }
 
+    /**
+     * Устанавливаем клон корабля на поле.
+     * @param  {Event}
+     */
     onMouseUp (e) {
         let user = this.field;
         this.pressed = false;
@@ -197,7 +215,7 @@ export default class Configurator {
                 if (this.draggable.left !== undefined && this.draggable.top !== undefined) {
                     this.draggable.elem.style.cssText = 'left:' + this.draggable.left + 'px; top:' + this.draggable.top + 'px;';
                 } else {
-                    this.cleanClone();
+                    this.removeClone();
                     return;
                 }
             }
@@ -211,18 +229,14 @@ export default class Configurator {
                 // this.y0 = coords.y;
                 this.clone.style.left = coords.left + 'px';
                 this.clone.style.top = coords.top + 'px';
-
-                // создаём экземпляр корабля
-                let shipConfig = {
-                        'shipname': this.clone.getAttribute('id'),
-                        'x': coords.x,
-                        'y': coords.y,
-                        'kx': this.draggable.kx,
-                        'ky': this.draggable.ky,
-                        'decks': this.decks
-                    };
-
-                let ship = new Ship(user, shipConfig);
+                let ship = new Ship(user, {
+                    'shipname': this.clone.getAttribute('id'),
+                    'x': coords.x,
+                    'y': coords.y,
+                    'kx': this.draggable.kx,
+                    'ky': this.draggable.ky,
+                    'decks': this.decks
+                });
                 ship.createShip();
                 document.getElementById(ship.name).style.zIndex = null;
                 user.element.removeChild(this.clone);
@@ -232,20 +246,24 @@ export default class Configurator {
                     this.draggable.elem.style.cssText = 'left:' + this.draggable.left + 'px; top:' + this.draggable.top + 'px;';
                 }
             }
-            this.cleanClone();
+            this.removeClone();
         }
         return false;
     }
 
-    creatClone () {
-        let avatar = this.draggable.elem,
-            old = {
-                parent:         avatar.parentNode,
-                nextSibling:    avatar.nextSibling,
-                left:           avatar.left || '',
-                top:            avatar.top || '',
-                zIndex:         avatar.zIndex || ''
-            };
+    /**
+     * Создание клона
+     * @return {Object}
+     */
+    createClone () {
+        let avatar = this.draggable.elem;
+        let old = {
+            parent: avatar.parentNode,
+            nextSibling: avatar.nextSibling,
+            left: avatar.left || '',
+            top: avatar.top || '',
+            zIndex: avatar.zIndex || ''
+        };
 
         avatar.rollback = function() {
             old.parent.insertBefore(avatar, old.nextSibling);
@@ -253,14 +271,24 @@ export default class Configurator {
             avatar.style.top = old.top;
             avatar.style.zIndex = old.zIndex;
         };
+
         return avatar;
     }
 
+    /**
+     * Начинаем перетаскивание
+     * @param  {Event}
+     */
     startDrag (e) {
         document.body.appendChild(this.clone);
         this.clone.style.zIndex = 1000;
     }
 
+    /**
+     * Определение элемента, куда опускается корабль
+     * @param  {Event}
+     * @return {DOMElement}
+     */
     findDroppable (e) {
         this.clone.hidden = true;
         let el = document.elementFromPoint(e.clientX, e.clientY);
@@ -268,6 +296,10 @@ export default class Configurator {
         return el.closest('.ships');
     }
 
+    /**
+     * Возвращаем размер клона корабля
+     * @return {Number}
+     */
     getDecksClone () {
         let type = this.clone.getAttribute('id').slice(0, -1);
         let data = this.field.shipsData;
@@ -278,14 +310,19 @@ export default class Configurator {
         }
     }
 
+    /**
+     * Метод возвращает координаты матрицы клона
+     * @param  {Number}
+     * @return {Object}
+     */
     getCoordsClone (decks) {
         let user = this.field,
-            pos     = this.clone.getBoundingClientRect(),
-            left    = pos.left - user.elementY,
-            right   = pos.right - user.elementY,
-            top     = pos.top - user.elementX,
-            bottom  = pos.bottom - user.elementX,
-            coords  = {};
+            pos = this.clone.getBoundingClientRect(),
+            left = pos.left - user.elementY,
+            right = pos.right - user.elementY,
+            top = pos.top - user.elementX,
+            bottom = pos.bottom - user.elementX,
+            coords = {};
 
         coords.left = (left < 0) ? 0 : (right > user.size) ? user.size - user.shipSize * decks : left;
         coords.left = Math.round(coords.left / user.shipSize) * user.shipSize;
@@ -297,25 +334,30 @@ export default class Configurator {
         return coords;
     }
 
-    cleanClone () {
+    /**
+     * Удаление клона
+     */
+    removeClone () {
         delete this.clone;
         delete this.draggable;
     }
 
+    /**
+     * Поворот корабля, если это возможно
+     * @param  {Event}
+     */
     rotationShip (e) {
         if (e.which != 3) return false;
         e.preventDefault();
         e.stopPropagation();
-
         let id = e.target.getAttribute('id');
-
         let user = this.field;
         // ищем корабль, у которого имя совпадает с полученным id
         for (let i = 0; i < user.squadron.length; i++) {
             let data = user.squadron[i];
             if (data.name == id && data.decks != 1) {
-                let kx  = (data.kx == 0) ? 1 : 0,
-                    ky  = (data.ky == 0) ? 1 : 0;
+                let kx  = (data.kx == 0) ? 1 : 0;
+                let ky  = (data.ky == 0) ? 1 : 0;
 
                 // удаляем экземпляр корабля
                 this.cleanShip(e.target);
@@ -324,20 +366,18 @@ export default class Configurator {
                 // проверяем валидность координат
                 let result = user.checkLocationShip(data.x0, data.y0, kx, ky, data.decks);
                 if (result === false) {
-                    let kx  = (kx == 0) ? 1 : 0,
-                        ky  = (ky == 0) ? 1 : 0;
+                    let kx  = (kx == 0) ? 1 : 0;
+                    let ky  = (ky == 0) ? 1 : 0;
                 }
-                // создаём экземпляр корабля
-                let shipConfig = {
+
+                let ship = new Ship(user, {
                     'shipname': data.name,
                     'x': data.x0,
                     'y': data.y0,
                     'kx': kx,
                     'ky': ky,
                     'decks': data.decks
-                };
-
-                let ship = new Ship(user, shipConfig);
+                });
                 ship.createShip();
                 if (!result) {
                     let el = document.getElementById(ship.name);
@@ -350,9 +390,15 @@ export default class Configurator {
                 return false;
             }
         }
+
         return false;
     }
 
+    /**
+     * 
+     * @param  {DOMElement}
+     * @return {[type]}
+     */
     cleanShip (el) {
         // получаем координаты в матрице
         let coords = el.getBoundingClientRect(),
