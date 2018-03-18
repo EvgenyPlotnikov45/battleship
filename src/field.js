@@ -17,7 +17,7 @@ export default class Field {
         ];
 
         this.wrapper = fieldElement;
-        this.element = fieldElement.firstChild;
+        this.element = fieldElement.firstElementChild;
         this.squadron = [];
         this.matrix = Utils.createMatrix();
         this.hiddenShips = [];

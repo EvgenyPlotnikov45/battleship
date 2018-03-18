@@ -100,31 +100,34 @@ export default class Game {
      */
     createPlayer (type) {
         let id = this.players.length + 1;
-        let fieldElement = document.createElement('div');
-        fieldElement.classList.add('field');
-        fieldElement.setAttribute('data-hidden', true);
-        let shipsElement = document.createElement('div');
-        shipsElement.classList.add('ships');
-        shipsElement.setAttribute('id', 'player' + id);
-        fieldElement.appendChild(shipsElement);
-        let field;
+        let element = this.getPlayerElement({
+            playerId: 'player' + id
+        });
+        let player;
         switch (type) {
             case 'computer':
-                field = new Computer(fieldElement);
+                player = new Computer(element);
                 break;
             case 'user':
-                field = new User(fieldElement);
+                player = new User(element);
                 break;
             default:
-                field = new Field(fieldElement);
+                player = new Field(element);
         }
-        field.index = id;
-        let fieldName = document.createElement('span');
-        fieldName.classList.add('fieldName');
-        fieldName.innerHTML = field.fullName;
-        fieldElement.appendChild(fieldName);
-        this.players.push(field);
-        document.getElementById('main').appendChild(fieldElement);
-        return field;
+        player.index = id;
+        element.querySelector('.fieldName').innerHTML = player.fullName;
+        this.players.push(player);
+        document.getElementById('main').appendChild(element);
+        return player;
+    }
+
+    getPlayerElement (tplData) {
+        let tpl = require('./templates/player.tpl');
+        let templater = require('lodash.template');
+        let compile = templater(tpl);
+        let element = document.createElement('div');
+        element.innerHTML = compile(tplData);
+        element = element.firstElementChild;
+        return element;
     }
 };
