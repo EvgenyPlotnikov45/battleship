@@ -114,12 +114,11 @@ export default class Computer extends Field {
     /**
      * Проверка и установка координат, которые нужно будет обстрелять, так как там
      * потенциально может быть корабль
-     * @param {Object}
+     * @param {Object} coords
      * @param {Field}
      */
-    setNeedCoordinatesShot (coords) {
+    checkNeedCoordinates (coords) {
         let kx = 0, ky = 0;
-
         if (Object.keys(this.firstHit).length === 0) {
             this.firstHit = coords;
         } else {
@@ -130,19 +129,20 @@ export default class Computer extends Field {
             this.lastHit = {};
         }
 
-        if (coords.x > 0 && ky == 0) this.needShootMatrix.push([coords.x - 1, coords.y]);
-        if (coords.x < 9 && ky == 0) this.needShootMatrix.push([coords.x + 1, coords.y]);
-        if (coords.y > 0 && kx == 0) this.needShootMatrix.push([coords.x, coords.y - 1]);
-        if (coords.y < 9 && kx == 0) this.needShootMatrix.push([coords.x, coords.y + 1]);
+        if (coords.x > 0 && ky == 0) this.setNeedCoord(coords.x - 1, coords.y);
+        if (coords.x < 9 && ky == 0) this.setNeedCoord(coords.x + 1, coords.y);
+        if (coords.y > 0 && kx == 0) this.setNeedCoord(coords.x, coords.y - 1);
+        if (coords.y < 9 && kx == 0) this.setNeedCoord(coords.x, coords.y + 1);
+    }
 
-        for (let i = this.needShootMatrix.length - 1; i >= 0; i--) {
-            let x = this.needShootMatrix[i][0];
-            let y = this.needShootMatrix[i][1];
-            //удаляем точки, по которым уже проводился обстрел или стрельба не имеет смысла
-            if (this.enemy.matrix[x][y] != 0 && this.enemy.matrix[x][y] != 1) {
-                this.needShootMatrix.splice(i,1);
-                this.deleteElementMatrix(this.shootMatrix, coords);
-            }
+    /**
+     * @param {Number} x
+     * @param {Number} y
+     */
+    setNeedCoord (x, y) {
+        let enemyMatrixValue = this.enemy.matrix[x][y];
+        if (enemyMatrixValue === 0 || enemyMatrixValue === 1) {
+            this.needShootMatrix.push([x, y]);
         }
     }
 
@@ -153,7 +153,6 @@ export default class Computer extends Field {
      * @return {[type]}
      */
     checkUnnecessaryCell (coords) {
-        let icons = this.enemy.element.querySelectorAll('.icon-field');
         let points = [
             {x: coords.x - 1, y: coords.y - 1},
             {x: coords.x - 1, y: coords.y + 1},
@@ -162,30 +161,17 @@ export default class Computer extends Field {
         ];
 
         for (let point of points) {
-            let flag = true;
-            if (point.x < 0 || point.x > 9 || point.y < 0 || point.y > 9) continue; // за пределами игрового поля
+            // если точка за пределами игрового поля, пропускаем
+            if (point.x < 0 || point.x > 9 || point.y < 0 || point.y > 9) continue;
+            // если точка уже помечена, пропускаем
+            if (this.enemy.matrix[point.x][point.y] !== 0) continue;
 
-            for (let icon of icons) {
-                let x = icon.style.top.slice(0, -2) / this.enemy.shipSize;
-                let y = icon.style.left.slice(0, -2) / this.enemy.shipSize;
-                if (point.x == x && point.y == y) {
-                    flag = false;
-                    break;
-                }
-            }
-
-            if (flag === false) continue;
-
-            let obj = {
-                x: point.x,
-                y: point.y
-            }
-            this.enemy.matrix[obj.x][obj.y] = 2;
-            Utils.showIcons(this.enemy, obj, 'dot');
-
+            let cellCoord = {x: point.x, y: point.y};
+            this.enemy.matrix[cellCoord.x][cellCoord.y] = 2;
+            Utils.showIcons(this.enemy, cellCoord, 'dot');
             // удаляем из массивов выстрелов ненужные координаты
-            this.deleteElementMatrix(this.shootMatrix, obj);
-            this.deleteElementMatrix(this.needShootMatrix, obj);
+            this.deleteElementMatrix(this.shootMatrix, cellCoord);
+            this.deleteElementMatrix(this.needShootMatrix, cellCoord);
         }
     }
 

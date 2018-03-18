@@ -200,7 +200,7 @@ export default class BattleController {
                 // отмечаем клетки, где точно не может стоять корабль
                 this.player.checkUnnecessaryCell(this.coords);
                 // обстрел клеток вокруг попадания
-                this.player.setNeedCoordinatesShot(this.coords);  
+                this.player.checkNeedCoordinates(this.coords);  
             }
         }
 
