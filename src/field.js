@@ -149,7 +149,7 @@ export default class Field {
         let divs = element.querySelectorAll('div.ship');
 
         for (let el of divs) {
-            parent.removeChild(el);
+            element.removeChild(el);
         }
         // очищаем массив объектов кораблей
         this.squadron.length = 0;

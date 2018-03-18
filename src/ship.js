@@ -30,10 +30,6 @@ export default class Ship {
 
         this.field.squadron.push(this);
         this.showShip();
-        //TODO обработать нормально
-        if (this.field.squadron.length == 10) {
-            document.getElementById('play').setAttribute('data-hidden', 'false');
-        }
     }
 
     showShip () {

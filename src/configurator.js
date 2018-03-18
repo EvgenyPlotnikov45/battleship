@@ -61,16 +61,18 @@ export default class Configurator {
         let el = e.target;
         if (el.tagName != 'SPAN') return;
         let shipsCollection = document.getElementById('ships_collection');
+        let playBtn = document.getElementById('play');
         // очищаем матрицу
         this.field.cleanField();
         this.field.resetMatrix();
         this.setObserver();
-
         if (el.getAttribute('data-target') === 'random') {
             shipsCollection.setAttribute('data-hidden', true);
             this.field.randomLocationShips();
+            this.checkEnd();
         } else {
             this.generateShipCollection();
+            playBtn.setAttribute('data-hidden', true);
             shipsCollection.setAttribute('data-hidden', false);
         }
     }
@@ -133,7 +135,7 @@ export default class Configurator {
         // в игровом поле юзера (редактирование положения корабля)
         if (el.parentElement.getAttribute('id') == this.field.element.getAttribute('id')) {
             let name = el.getAttribute('id');
-            this.getDirectionShip(name);
+            this.setDirectionShip(name);
             let computedStyle = window.getComputedStyle(el);
             this.draggable.left = computedStyle.left.slice(0, -2);
             this.draggable.top  = computedStyle.top.slice(0, -2);
@@ -173,10 +175,8 @@ export default class Configurator {
         this.clone.style.left = currLeft + 'px';
         this.clone.style.top = currTop + 'px';
 
-        if (currLeft >= user.elementY &&
-            currRight <= user.elementRight &&
-            currTop >= user.elementX &&
-            currBtm <= user.elementBtm) {
+        if (currLeft >= user.elementY && currRight <= user.elementRight &&
+            currTop >= user.elementX && currBtm <= user.elementBtm) {
             // получаем координаты привязанные в сетке поля и в координатах матрицы
             let coords = this.getCoordsClone(this.decks);
             // проверяем валидность установленных координат
@@ -238,6 +238,7 @@ export default class Configurator {
                     'decks': this.decks
                 });
                 ship.createShip();
+                this.checkEnd();
                 document.getElementById(ship.name).style.zIndex = null;
                 user.element.removeChild(this.clone);
             } else {
@@ -371,12 +372,12 @@ export default class Configurator {
                 }
 
                 let ship = new Ship(user, {
-                    'shipname': data.name,
-                    'x': data.x0,
-                    'y': data.y0,
-                    'kx': kx,
-                    'ky': ky,
-                    'decks': data.decks
+                    shipname: data.name,
+                    x: data.x0,
+                    y: data.y0,
+                    kx: kx,
+                    ky: ky,
+                    decks: data.decks
                 });
                 ship.createShip();
                 if (!result) {
@@ -395,9 +396,8 @@ export default class Configurator {
     }
 
     /**
-     * 
+     * Удаление корабля по элементу
      * @param  {DOMElement}
-     * @return {[type]}
      */
     cleanShip (el) {
         // получаем координаты в матрице
@@ -424,7 +424,11 @@ export default class Configurator {
         }
     }
 
-    getDirectionShip (shipname) {
+    /**
+     * Устанавливаем направление корабля
+     * @param {String} shipname
+     */
+    setDirectionShip (shipname) {
         let data;
         let user = this.field;
         for (let i = 0; i < user.squadron.length; i++) {
@@ -434,6 +438,15 @@ export default class Configurator {
                 this.draggable.ky = data.ky;
                 return;
             }
+        }
+    }
+
+    /**
+     * Проверка на окончание конфигурирования поля, отображаем кнопку продолжения игры
+     */
+    checkEnd () {
+        if (this.field.squadron.length == 10) {
+            document.getElementById('play').setAttribute('data-hidden', false);
         }
     }
 }
